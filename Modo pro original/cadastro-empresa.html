@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cadastro Empresarial</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+:root{
+--primary:#0f172a;
+--accent:#22c55e;
+--bg:#eef2f7;
+--card:#ffffff;
+--text:#334155;
+--border:#e2e8f0;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+
+body{
+background:var(--bg);
+padding:2rem;
+}
+
+/* CONTAINER */
+.wrapper{
+max-width:950px;
+margin:auto;
+}
+
+/* HEADER */
+header{
+text-align:center;
+margin-bottom:2rem;
+}
+
+header h1{
+font-size:1.8rem;
+color:var(--primary);
+}
+
+header p{
+color:#64748b;
+margin-top:.3rem;
+}
+
+/* CARD */
+.card{
+background:var(--card);
+border-radius:16px;
+padding:2rem;
+box-shadow:0 10px 30px rgba(0,0,0,.08);
+margin-bottom:1.5rem;
+}
+
+/* TITULO SEÇÃO */
+.section-title{
+font-size:1rem;
+font-weight:600;
+color:var(--primary);
+margin-bottom:1.2rem;
+display:flex;
+align-items:center;
+gap:.5rem;
+}
+
+/* GRID */
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:1.2rem;
+}
+
+/* INPUTS */
+.group{
+display:flex;
+flex-direction:column;
+}
+
+label{
+font-size:.8rem;
+color:#475569;
+margin-bottom:.3rem;
+}
+
+input,select,textarea{
+padding:.75rem;
+border-radius:8px;
+border:1px solid var(--border);
+background:#f8fafc;
+transition:.2s;
+font-size:.9rem;
+}
+
+input:focus,select:focus,textarea:focus{
+outline:none;
+border-color:var(--accent);
+box-shadow:0 0 0 3px rgba(34,197,94,.15);
+}
+
+/* FULL */
+.full{
+grid-column:1/-1;
+}
+
+/* BOTÕES */
+.actions{
+display:flex;
+justify-content:flex-end;
+gap:1rem;
+margin-top:1rem;
+}
+
+button{
+padding:.8rem 1.4rem;
+border:none;
+border-radius:8px;
+font-weight:600;
+cursor:pointer;
+}
+
+.save{
+background:var(--primary);
+color:white;
+}
+
+.clear{
+background:#e2e8f0;
+}
+
+/* HOVER */
+button:hover{
+opacity:.85;
+}
+
+/* RESPONSIVO */
+@media(max-width:600px){
+body{padding:1rem}
+.card{padding:1.3rem}
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<header>
+<h1><i class="fas fa-building"></i> Cadastro Empresarial</h1>
+<p>Cadastre sua empresa e encontre os melhores profissionais</p>
+</header>
+
+<form>
+
+<!-- EMPRESA -->
+<div class="card">
+<div class="section-title"><i class="fas fa-id-card"></i> Dados da Empresa</div>
+
+<div class="grid">
+
+<div class="group full">
+<label>Razão Social</label>
+<input type="text" placeholder="Razão Social Completa">
+</div>
+
+<div class="group">
+<label>Nome Fantasia</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>CNPJ</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>Inscrição Estadual</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>Tipo</label>
+<select>
+<option>Serviços</option>
+<option>Comércio</option>
+<option>Indústria</option>
+</select>
+</div>
+
+<div class="group">
+<label>Porte</label>
+<select>
+<option>MEI</option>
+<option>Micro</option>
+<option>Pequena</option>
+<option>Média</option>
+<option>Grande</option>
+</select>
+</div>
+
+<div class="group">
+<label>Nº Funcionários</label>
+<input type="number">
+</div>
+
+</div>
+</div>
+
+<!-- LOCAL -->
+<div class="card">
+<div class="section-title"><i class="fas fa-map-marker-alt"></i> Localização</div>
+
+<div class="grid">
+
+<div class="group">
+<label>CEP</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>Estado</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>Cidade</label>
+<input type="text">
+</div>
+
+<div class="group full">
+<label>Endereço</label>
+<input type="text">
+</div>
+
+</div>
+</div>
+
+<!-- CONTATO -->
+<div class="card">
+<div class="section-title"><i class="fas fa-phone"></i> Contato</div>
+
+<div class="grid">
+
+<div class="group">
+<label>Telefone</label>
+<input type="text">
+</div>
+
+<div class="group">
+<label>Email</label>
+<input type="email">
+</div>
+
+<div class="group">
+<label>Site</label>
+<input type="url">
+</div>
+
+</div>
+</div>
+
+<!-- SOBRE -->
+<div class="card">
+<div class="section-title"><i class="fas fa-file-alt"></i> Sobre a Empresa</div>
+
+<div class="group">
+<label>Descrição</label>
+<textarea rows="4"></textarea>
+</div>
+</div>
+
+<div class="actions">
+<button type="reset" class="clear">Limpar</button>
+<button type="submit" class="save">Salvar</button>
+</div>
+
+</form>
+
+</div>
+
+</body>
+</html>

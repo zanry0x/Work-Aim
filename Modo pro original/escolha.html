@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escolha seu Perfil | Vagas</title>
+<style>
+* {
+margin: 0;
+padding: 0;
+box-sizing: border-box;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+/* Mesmo gradiente verde do login */
+background: linear-gradient(135deg, #4ade80, #16a34a);
+height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.card {
+background-color: #121212;
+padding: 40px;
+border-radius: 16px;
+width: 100%;
+max-width: 450px; /* Um pouco mais largo para dois botões */
+box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+text-align: center;
+}
+
+h2 {
+color: white;
+margin-bottom: 30px;
+font-size: 1.8rem;
+font-weight: 600;
+}
+
+/* Estilo base dos botões de escolha */
+.btn-choice {
+display: block;
+width: 100%;
+padding: 15px;
+margin-bottom: 20px;
+border: none;
+border-radius: 8px;
+font-size: 1.1rem;
+font-weight: bold;
+cursor: pointer;
+text-decoration: none;
+transition: transform 0.2s, filter 0.2s;
+color: white;
+}
+
+.btn-choice:hover {
+transform: translateY(-2px);
+filter: brightness(1.1);
+}
+
+.btn-choice:active {
+transform: translateY(0);
+}
+
+/* Botão Trabalhador (Azul ou Verde? Vamos de Azul para diferenciar, ou Verde se preferir) */
+/* Vou usar um tom de Azul Profissional para Candidato */
+.btn-trabalhador {
+background-color: #2563eb;
+}
+
+/* Botão Empresa (Laranja ou Roxo? Vamos de Laranja para destaque) */
+.btn-empresa {
+background-color: #ea580c;
+}
+
+/* Link de voltar */
+.back-link {
+display: inline-block;
+margin-top: 15px;
+color: #888;
+text-decoration: none;
+font-size: 0.9rem;
+}
+
+.back-link:hover {
+color: #4ade80;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+<h2>Qual é o seu objetivo?</h2>
+
+<!-- Botão 1: Trabalhador -->
+<!-- Redireciona para o arquivo de cadastro do trabalhador -->
+<a href="cadastro-trabalhador.html" class="btn-choice btn-trabalhador">
+👤 Sou Trabalhador<Br>(Procuro emprego)
+</a>
+
+<!-- Botão 2: Empresa -->
+<!-- Redireciona para o arquivo de cadastro da empresa -->
+<a href="cadastro-empresa.html" class="btn-choice btn-empresa">
+🏢 Sou Empresa<Br>(Quero contratar)
+</a>
+
+<a href="login.html" class="back-link">← Voltar ao Login</a>
+</div>
+
+</body>
+</html>
