@@ -173,8 +173,8 @@ button:hover {
   height: 100%;
 
   background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 2px, transparent 2px),
+    linear-gradient(90deg, var(--grid-line) 2px, transparent 2px);
 
   background-size: var(--grid-size) var(--grid-size);
 }
