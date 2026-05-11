@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Portal de Vagas | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --bg-body: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --card-white: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            height: 100vh; 
+            background: var(--bg-body); 
+            color: var(--text-main);
+            display: flex; 
+        }
+        
+        .sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 32px 20px; flex-shrink: 0; z-index: 1001; }
+        .sidebar h2 { font-size: 18px; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .menu a { text-decoration: none; color: var(--text-muted); padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
+        .menu a.active, .menu a:hover { background: var(--primary); color: white; }
+
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; height: 100vh; }
+        .topbar { background: var(--card-white); padding: 20px; display: flex; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 1000; }
+        .search-container { flex: 1; display: grid; grid-template-columns: 1fr 1fr auto; background: #fff; border-radius: 14px; border: 2px solid var(--border-color); position: relative; }
+        .input-group { position: relative; display: flex; align-items: center; padding: 5px; min-width: 0; cursor: text; }
+        .input-group:not(:last-child) { border-right: 2px solid var(--border-color); }
+        .input-group i { position: absolute; left: 15px; color: var(--text-muted); pointer-events: none; }
+        .topbar input { width: 100%; padding: 12px 12px 12px 45px; border: none; outline: none; font-size: 15px; background: transparent; }
+
+        .suggestions { position: absolute; top: calc(100% + 8px); left: 0; width: 100%; background: white; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border-color); max-height: 350px; overflow-y: auto; display: none; z-index: 2000; }
+        .suggestions.active { display: block; }
+        .suggestion-item { padding: 14px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; border-bottom: 1px solid #f8fafc; font-size: 14px; transition: 0.2s; }
+        .suggestion-item:hover { background: var(--primary-light); }
+
+        .btn-search { padding: 0 25px; background: var(--primary); color: white; border: none; border-radius: 0 12px 12px 0; font-weight: 700; cursor: pointer; }
+        .content { padding: 20px; }
+        .vaga { background: white; padding: 20px; border-radius: 16px; margin-bottom: 15px; border: 1px solid var(--border-color); }
+
+        .btn-logout { margin-top: auto; color: #ef4444 !important; display: none; }
+        .btn-logout:hover { background: #fef2f2 !important; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; padding: 15px; }
+            .sidebar .menu { display: none; }
+            .search-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <h2><i data-lucide="zap"></i> <span>PortalVagas</span></h2>
+    <nav class="menu">
+        <a href="1Home.html" class="active"><i data-lucide="layout-grid"></i> <span>Início</span></a>
+        <a href="#" class="auth-required"><i data-lucide="send"></i> <span>Candidaturas</span></a>
+        
+        <a href="curriculoeditar.html" class="auth-required"><i data-lucide="file-user"></i> <span>Currículo</span></a>
+        
+        <div style="margin: 20px 0; border-top: 1px solid var(--border-color);"></div>
+        <a href="#" class="auth-required"><i data-lucide="settings"></i> <span>Configurações</span></a>
+        <a href="#" id="logout-btn" class="btn-logout"><i data-lucide="log-out"></i> <span>Sair</span></a>
+    </nav>
+</aside>
+
+<main class="main">
+    <header class="topbar">
+        <div class="search-container">
+            <div class="input-group" onclick="document.getElementById('job-input').focus()">
+                <i data-lucide="search"></i>
+                <input type="text" id="job-input" placeholder="Cargo ou serviço" autocomplete="off">
+                <div class="suggestions" id="job-suggestions"></div>
+            </div>
+            <div class="input-group" onclick="document.getElementById('loc-input').focus()">
+                <i data-lucide="map-pin"></i>
+                <input type="text" id="loc-input" placeholder="Cidade" autocomplete="off">
+                <div class="suggestions" id="loc-suggestions"></div>
+            </div>
+            <button class="btn-search">Buscar</button>
+        </div>
+    </header>
+
+    <section class="content">
+        <div id="user-welcome">
+             <h1 id="user-name">Bem-vindo</h1>
+             <p style="color: var(--text-muted); margin-bottom: 20px;">Confira as vagas selecionadas para você.</p>
+        </div>
+        
+        <div class="vaga">
+            <h3>Diarista / Limpeza Geral</h3>
+            <p style="color: var(--text-muted); font-size: 14px;">Residencial Solar • Diária: R$ 180,00</p>
+        </div>
+    </section>
+</main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+        authDomain: "meuportaldevagas.firebaseapp.com",
+        projectId: "meuportaldevagas",
+        storageBucket: "meuportaldevagas.firebasestorage.app",
+        messagingSenderId: "77991933793",
+        appId: "1:77991933793:web:2e8df544915ce3dc463720"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    let isLogged = false;
+
+    onAuthStateChanged(auth, (user) => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (user) {
+            isLogged = true;
+            const nomeExibicao = user.displayName || user.email.split('@')[0];
+            document.getElementById('user-name').innerText = `Bem-vindo, ${nomeExibicao}`;
+            logoutBtn.style.display = 'flex';
+        } else {
+            isLogged = false;
+            document.getElementById('user-name').innerText = `Bem-vindo, Visitante`;
+            logoutBtn.style.display = 'none';
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        const authLink = e.target.closest('.auth-required');
+        if (authLink) {
+            // Se NÃO estiver logado, bloqueia o redirecionamento e manda para o login
+            if (!isLogged) {
+                e.preventDefault();
+                alert("Acesso restrito. Por favor, faça login para continuar.");
+                window.location.href = "escolha.html";
+            }
+            // Se estiver logado, ele segue naturalmente para o href do link (curriculoeditar.html)
+        }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => {
+            window.location.replace("escolha.html");
+        });
+    });
+</script>
+
+<script>
+    const jobs = ["Limpeza Geral", "Diarista", "Carga e Descarga", "Pintor", "Vendedor", "Porteiro"];
+    const locations = ["São Paulo, SP", "Rio de Janeiro, RJ", "Remoto"];
+
+    function setupDropdown(inputId, dropdownId, dataList, iconName) {
+        const input = document.getElementById(inputId);
+        const dropdown = document.getElementById(dropdownId);
+        input.addEventListener('focus', () => { renderList(dataList); dropdown.classList.add('active'); });
+        document.addEventListener('click', (e) => { if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.classList.remove('active'); });
+        function renderList(list) {
+            dropdown.innerHTML = '<div class="suggestion-header">Sugestões</div>';
+            list.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<i data-lucide="${iconName}" style="width:16px"></i> ${item}`;
+                div.onclick = () => { input.value = item; dropdown.classList.remove('active'); };
+                dropdown.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+    }
+    setupDropdown('job-input', 'job-suggestions', jobs, 'briefcase');
+    setupDropdown('loc-input', 'loc-suggestions', locations, 'map-pin');
+    lucide.createIcons();
+</script>
+
+</body>
+</html>
