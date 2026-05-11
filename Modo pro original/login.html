@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- ESQUERDA -->
+<div class="left">
+  <div class="form-wrapper">
+
+    <div class="header">
+      <h1>Entrar</h1>
+      <p>Ainda não possui conta? <a href="escolha.html">Cadastrar-se</a></p>
+    </div>
+
+    <div class="card">
+
+<form id="loginForm">
+
+<input 
+type="email" 
+id="email" 
+name="email" 
+placeholder="E-mail"
+required
+>
+
+<div class="input-group">
+
+<input 
+type="password" 
+id="senha" 
+name="senha" 
+placeholder="Senha"
+required
+>
+
+<i 
+class="fas fa-eye toggle-password" 
+onclick="toggleSenha('senha', this)"
+></i>
+
+</div>
+
+<button type="submit">
+Entrar
+</button>
+
+</form>
+
+    </div>
+  </div>
+</div>
+
+<!-- DIREITA -->
+<div class="right">
+  <img src="WorkAim2.png" class="logo">
+</div>
+
+</div>
+
+<script type="module">
+    // 1. Importações do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    // 2. Sua Configuração
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+        authDomain: "meuportaldevagas.firebaseapp.com",
+        projectId: "meuportaldevagas",
+        storageBucket: "meuportaldevagas.firebasestorage.app",
+        messagingSenderId: "77991933793",
+        appId: "1:77991933793:web:2e8df544915ce3dc463720"
+    };
+
+    // 3. Inicialização
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    /* ================= TOGGLE SENHA (Ajustado para o módulo) ================= */
+    window.toggleSenha = function(id, icon) {
+        const input = document.getElementById(id);
+        input.type = input.type === "password" ? "text" : "password";
+        icon.classList.toggle("fa-eye");
+        icon.classList.toggle("fa-eye-slash");
+    }
+
+    /* ================= LÓGICA DE LOGIN COM FIREBASE ================= */
+    const loginForm = document.getElementById("loginForm");
+
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const senha = document.getElementById("senha").value;
+        const btnSubmit = loginForm.querySelector("button");
+
+        try {
+            btnSubmit.innerText = "Entrando...";
+            btnSubmit.disabled = true;
+
+            // Define persistência (mantém logado ao fechar a aba)
+            await setPersistence(auth, browserLocalPersistence);
+
+            // Tenta o login
+            const userCredential = await signInWithEmailAndPassword(auth, email, senha);
+            const user = userCredential.user;
+
+            console.log("Login realizado:", user.email);
+
+            // Salva dados básicos no LocalStorage (opcional, como você já fazia)
+            localStorage.setItem("empresaNome", user.email);
+            localStorage.setItem("sessaoAtiva", "true");
+
+            // Redireciona para a página desejada
+            window.location.href = "1Home.html";
+
+        } catch (error) {
+            console.error("Erro de login:", error.code);
+            
+            // Tratamento de erros comuns
+            if (error.code === 'auth/invalid-credential' || error.code === 'auth/wrong-password') {
+                alert("E-mail ou senha incorretos.");
+            } else if (error.code === 'auth/user-not-found') {
+                alert("Usuário não encontrado.");
+            } else {
+                alert("Erro ao entrar: " + error.message);
+            }
+        } finally {
+            btnSubmit.innerText = "Entrar";
+            btnSubmit.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>

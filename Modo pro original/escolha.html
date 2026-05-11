@@ -1,112 +1,175 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Escolha seu Perfil | Vagas</title>
-<style>
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolha seu Perfil | Vagas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
 
-body {
-/* Mesmo gradiente verde do login */
-background: linear-gradient(135deg, #4ade80, #16a34a);
-height: 100vh;
-display: flex;
-justify-content: center;
-align-items: center;
-}
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4ade80, #16a34a);
+            --card-bg: rgba(18, 18, 18, 0.95);
+            --blue-action: #2563eb;
+            --orange-action: #ea580c;
+        }
 
-.card {
-background-color: #121212;
-padding: 40px;
-border-radius: 16px;
-width: 100%;
-max-width: 450px; /* Um pouco mais largo para dois botões */
-box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-text-align: center;
-}
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
-h2 {
-color: white;
-margin-bottom: 30px;
-font-size: 1.8rem;
-font-weight: 600;
-}
+        body {
+            background: var(--primary-gradient);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-/* Estilo base dos botões de escolha */
-.btn-choice {
-display: block;
-width: 100%;
-padding: 15px;
-margin-bottom: 20px;
-border: none;
-border-radius: 8px;
-font-size: 1.1rem;
-font-weight: bold;
-cursor: pointer;
-text-decoration: none;
-transition: transform 0.2s, filter 0.2s;
-color: white;
-}
+        /* Efeito de círculo decorativo no fundo para dar profundidade */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            z-index: 0;
+        }
 
-.btn-choice:hover {
-transform: translateY(-2px);
-filter: brightness(1.1);
-}
+        .card {
+            background-color: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
 
-.btn-choice:active {
-transform: translateY(0);
-}
+        h2 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
 
-/* Botão Trabalhador (Azul ou Verde? Vamos de Azul para diferenciar, ou Verde se preferir) */
-/* Vou usar um tom de Azul Profissional para Candidato */
-.btn-trabalhador {
-background-color: #2563eb;
-}
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 35px;
+            font-size: 0.95rem;
+        }
 
-/* Botão Empresa (Laranja ou Roxo? Vamos de Laranja para destaque) */
-.btn-empresa {
-background-color: #ea580c;
-}
+        .btn-choice {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: none;
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: white;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
 
-/* Link de voltar */
-.back-link {
-display: inline-block;
-margin-top: 15px;
-color: #888;
-text-decoration: none;
-font-size: 0.9rem;
-}
+        .btn-choice:hover {
+            transform: scale(1.02);
+            filter: brightness(1.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
 
-.back-link:hover {
-color: #4ade80;
-}
-</style>
+        .icon-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .text-content b {
+            display: block;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+        }
+
+        .text-content span {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            font-weight: 400;
+        }
+
+        .btn-trabalhador { background-color: var(--blue-action); }
+        .btn-empresa { background-color: var(--orange-action); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 25px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .back-link:hover { color: #4ade80; }
+
+        @media (max-width: 480px) {
+            .card { padding: 40px 25px; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="card">
-<h2>Qual é o seu objetivo?</h2>
+    <h2>Bem-vindo!</h2>
+    <p class="subtitle">Como você deseja utilizar o portal?</p>
 
-<!-- Botão 1: Trabalhador -->
-<!-- Redireciona para o arquivo de cadastro do trabalhador -->
-<a href="cadastro-trabalhador.html" class="btn-choice btn-trabalhador">
-👤 Sou Trabalhador<Br>(Procuro emprego)
-</a>
+    <a href="cadastro-trabalhador.html" class="btn-choice btn-trabalhador">
+        <div class="icon-box">
+            <i data-lucide="user"></i>
+        </div>
+        <div class="text-content">
+            <b>Sou Trabalhador</b>
+            <span>Procuro uma oportunidade</span>
+        </div>
+    </a>
 
-<!-- Botão 2: Empresa -->
-<!-- Redireciona para o arquivo de cadastro da empresa -->
-<a href="cadastro-empresa.html" class="btn-choice btn-empresa">
-🏢 Sou Empresa<Br>(Quero contratar)
-</a>
+    <a href="cadastro-empresa.html" class="btn-choice btn-empresa">
+        <div class="icon-box">
+            <i data-lucide="building-2"></i>
+        </div>
+        <div class="text-content">
+            <b>Sou Empresa</b>
+            <span>Quero anunciar vagas</span>
+        </div>
+    </a>
 
-<a href="login.html" class="back-link">← Voltar ao Login</a>
+    <a href="login.html" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px"></i> Voltar ao Login
+    </a>
 </div>
+
+<script>
+    // Inicia os ícones do Lucide
+    lucide.createIcons();
+</script>
 
 </body>
 </html>
