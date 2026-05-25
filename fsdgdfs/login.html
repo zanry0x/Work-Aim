@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* Variáveis de Cores */
+        :root {
+            --azul-escuro: #1a2a6c;
+            --laranja: #f39c12;
+            --laranja-hover: #e67e22;
+            --branco: #ffffff;
+            --cinza-fundo: #f4f7f6;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--azul-escuro) 0%, #2a4858 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Botão de Suporte */
+        .support-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--laranja);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            z-index: 100;
+        }
+
+        .support-btn:hover {
+            transform: scale(1.05);
+            background-color: var(--laranja-hover);
+        }
+
+        /* Modal / Popup de Suporte */
+        .support-modal {
+            display: none;
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 101;
+            width: 250px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .support-modal h3 { margin-top: 0; color: var(--azul-escuro); font-size: 1.1rem; }
+        .support-modal p { font-size: 0.9rem; margin: 10px 0; color: #555; }
+        .support-modal a { 
+            display: block; 
+            text-decoration: none; 
+            color: var(--azul-escuro); 
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .support-modal i { color: #25d366; margin-right: 8px; }
+
+        /* Container de Login */
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--branco);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            color: var(--azul-escuro);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header p {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .header a {
+            color: var(--laranja);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* Formulário */
+        form input[type="email"], 
+        form input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            outline-color: var(--laranja);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 22px;
+            cursor: pointer;
+            color: #888;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background-color: var(--azul-escuro);
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0f1a4a;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<button class="support-btn" onclick="toggleSupport()">
+    <i class="fas fa-headset"></i> Suporte
+</button>
+
+<div id="supportModal" class="support-modal">
+    <h3>Precisa de ajuda?</h3>
+    <p>Fale conosco agora:</p>
+    <a href="https://wa.me/5593999781579" target="_blank">
+        <i class="fab fa-whatsapp"></i> (93) 99978-1579
+    </a>
+    <p>Ou envie um e-mail:</p>
+    <a href="mailto:vagas@gmail.com" style="color: var(--laranja); font-size: 0.85rem;">
+        <i class="fas fa-envelope" style="color: var(--laranja);"></i> vagas@gmail.com
+    </a>
+</div>
+
+<div class="container">
+    <div class="left">
+        <div class="form-wrapper">
+            <div class="card">
+                <div class="header">
+                    <h1>Entrar</h1>
+                    <p>Ainda não possui conta? <a href="escolha.html">Cadastrar-se</a></p>
+                </div>
+                
+                <form id="loginForm">
+                    <input type="email" id="email" name="email" placeholder="E-mail" required>
+
+                    <div class="input-group">
+                        <input type="password" id="senha" name="senha" placeholder="Senha" required>
+                        <i class="fas fa-eye toggle-password" onclick="toggleSenha('senha', this)"></i>
+                    </div>
+
+                    <button type="submit">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+<script>
+    // Função para abrir/fechar o popup de suporte
+    function toggleSupport() {
+        const modal = document.getElementById('supportModal');
+        modal.style.display = (modal.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Fecha o modal se clicar fora dele
+    window.onclick = function(event) {
+        if (!event.target.matches('.support-btn') && !event.target.closest('.support-modal')) {
+            document.getElementById('supportModal').style.display = 'none';
+        }
+    }
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+        authDomain: "meuportaldevagas.firebaseapp.com",
+        projectId: "meuportaldevagas",
+        storageBucket: "meuportaldevagas.firebasestorage.app",
+        messagingSenderId: "77991933793",
+        appId: "1:77991933793:web:2e8df544915ce3dc463720",
+        measurementId: "G-JMEWXD1DYW" 
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    window.toggleSenha = function(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove("fa-eye");
+            icon.classList.add("fa-eye-slash");
+        } else {
+            input.type = "password";
+            icon.classList.remove("fa-eye-slash");
+            icon.classList.add("fa-eye");
+        }
+    }
+
+    const loginForm = document.getElementById("loginForm");
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value.trim();
+        const senha = document.getElementById("senha").value;
+        const btnSubmit = loginForm.querySelector("button");
+
+        try {
+            btnSubmit.innerText = "Entrando...";
+            btnSubmit.disabled = true;
+
+            const userCredential = await auth.signInWithEmailAndPassword(email, senha);
+            const user = userCredential.user;
+
+            const empresaQuery = await db.collection("Empresas").where("uid", "==", user.uid).get();
+            if (!empresaQuery.empty) {
+                const dadosEmpresa = empresaQuery.docs[0].data();
+                localStorage.setItem("empresaNome", dadosEmpresa.nome || user.email);
+                localStorage.setItem("sessaoAtiva", "true");
+                window.location.href = "cadastro-vaga.html";
+                return;
+            }
+
+            const trabalhadorQuery = await db.collection("Trabalhadores").where("uid", "==", user.uid).get();
+
+            if (!trabalhadorQuery.empty) {
+                const dadosTrabalhador = trabalhadorQuery.docs[0].data();
+                localStorage.setItem("usuarioNome", dadosTrabalhador.dados_pessoais?.nome || "Trabalhador");
+                localStorage.setItem("sessaoAtiva", "true");
+                window.location.href = "1Home.html";
+                return;
+            }
+
+            alert("Sua conta de acesso foi validada, porém não encontramos dados vinculados.");
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "Entrar";
+
+        } catch (error) {
+            console.error("Falha no login:", error);
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                alert("E-mail ou senha incorretos.");
+            } else if (error.code === 'auth/user-not-found') {
+                alert("Nenhum usuário cadastrado com este e-mail.");
+            } else {
+                alert("Erro ao acessar o sistema: " + error.message);
+            }
+            btnSubmit.innerText = "Entrar";
+            btnSubmit.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>

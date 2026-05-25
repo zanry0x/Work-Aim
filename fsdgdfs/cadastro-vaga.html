@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Corporativo | Gestão de Vagas & Talentos</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-body: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; height: 100vh; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
+
+        /* Sidebar e Responsividade */
+        .sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 24px; flex-shrink: 0; transition: transform 0.3s ease; z-index: 1000; }
+        .brand { font-size: 20px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; margin-bottom: 40px; }
+        
+        .menu { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+        .menu a { text-decoration: none; color: var(--text-muted); padding: 12px 16px; border-radius: 10px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.2s; cursor: pointer; }
+        .menu a.active { background: #eff6ff; color: var(--primary); }
+        .menu a:hover:not(.active) { background: #f1f5f9; color: var(--text-main); }
+        .menu-bottom { border-top: 1px solid var(--border-color); margin-top: auto; padding-top: 20px; }
+
+        /* Main e Header */
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; width: 100%; position: relative; }
+        .header { background: #fff; padding: 20px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        
+        .menu-toggle { display: none; background: none; border: none; cursor: pointer; color: var(--text-main); }
+        .user-profile { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 14px; }
+        .avatar { width: 40px; height: 40px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        /* Ícones de Ação e Badges */
+        .action-icons { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { position: relative; background: none; border: none; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+        .icon-btn:hover { color: var(--primary); }
+        .badge { position: absolute; top: -6px; right: -8px; background: var(--danger); color: white; border-radius: 50%; font-size: 10px; width: 18px; height: 18px; display: none; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #fff; }
+        .badge.active { display: flex; }
+
+        /* Views */
+        .view-section { display: none; padding: 32px; max-width: 1100px; margin: 0 auto; width: 100%; animation: fadeIn 0.3s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dashboard Home */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 32px; }
+        .metric-card { background: #fff; padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; }
+        .metric-val { font-size: 28px; font-weight: 700; color: var(--primary); margin-top: 5px; }
+        .notification-box { background: #fff; border-radius: 16px; border: 1px solid var(--border-color); padding: 24px; box-shadow: var(--shadow); }
+        .noti-item { padding: 14px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .noti-item:hover { background: #f8fafc; }
+
+        /* Forms & Cards */
+        .card { background: #fff; border-radius: 16px; padding: 32px; box-shadow: var(--shadow); border: 1px solid var(--border-color); }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .form-control { padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 15px; outline: none; transition: 0.2s; background: #fff; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+        textarea.form-control { min-height: 100px; resize: vertical; }
+
+        /* Steps & Tags */
+        .progress-bar { height: 8px; background: var(--border-color); border-radius: 4px; margin-bottom: 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--primary); width: 14%; transition: 0.3s; border-radius: 4px; }
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.4s ease; }
+        .tags-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .tag { padding: 8px 16px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 20px; font-size: 13px; cursor: pointer; transition: 0.2s; user-select: none; }
+        .tag.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Actions buttons */
+        .actions { display: flex; justify-content: space-between; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-color); }
+        .btn { padding: 12px 24px; border-radius: 10px; font-weight: 600; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-sm { padding: 8px 14px; font-size: 12px; border-radius: 8px; }
+
+        /* Lists */
+        .list-item { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); flex-wrap: wrap; gap: 15px; }
+        .item-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; }
+        .status-badge.ativa { background: #d1fae5; color: #065f46; }
+        .status-badge.preenchida { background: #e2e8f0; color: #475569; }
+        
+        /* Chat Layout */
+        .chat-container { display: flex; flex-direction: column; height: 500px; background: #fff; border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden; box-shadow: var(--shadow); }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background: #f8fafc; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; font-size: 14px; line-height: 1.5; }
+        .message.empresa { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .message.trabalhador { background: #e2e8f0; color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .chat-input-area { padding: 16px; background: #fff; border-top: 1px solid var(--border-color); display: flex; gap: 12px; }
+
+        /* Modals & Popups */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 2000; display: none; opacity: 0; transition: 0.2s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .popup-card { background: #fff; padding: 32px; border-radius: 16px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-lg); }
+        .close-popup { position: absolute; top: 16px; right: 16px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+        
+        /* Secoes de Perfil Interno */
+        .perfil-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .perfil-section h4 { color: var(--text-main); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .perfil-section p { color: var(--text-muted); font-size: 13.5px; line-height: 1.5; }
+        .skill-badge { background: #f1f5f9; color: var(--primary); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block; margin: 4px; }
+
+        /* ADAPTAÇÃO PARA CELULAR E TABLET */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: 0; top: 0; height: 100%; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .menu-toggle { display: block; }
+            .hide-mobile { display: none !important; }
+            .header { padding: 15px 20px; }
+            .view-section { padding: 20px 15px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .card { padding: 20px; }
+            .list-item { flex-direction: column; align-items: flex-start; }
+            .item-actions { width: 100%; }
+            .item-actions .btn { flex: 1; }
+            .chat-container { height: 70vh; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="brand"><i data-lucide="zap"></i> PortalVagas</div>
+        <nav class="menu">
+            <a onclick="switchView('home', this)" class="active"><i data-lucide="layout-dashboard"></i> Dashboard</a>
+            <a onclick="switchView('publicar', this)"><i data-lucide="plus-circle"></i> Publicar Vaga</a>
+            <a onclick="switchView('minhas-vagas', this)"><i data-lucide="list"></i> Minhas Vagas</a>
+            <a onclick="switchView('candidatos', this)"><i data-lucide="users"></i> Candidatos Recebidos</a>
+        </nav>
+        <div class="menu menu-bottom">
+            <a onclick="openSupport()"><i data-lucide="settings"></i> Configurações</a>
+            <a id="btn-logout" style="color: var(--danger);"><i data-lucide="log-out"></i> Sair</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">
+                    <i data-lucide="menu"></i>
+                </button>
+                <h1 id="header-title" class="hide-mobile">Dashboard Inicial</h1>
+            </div>
+            
+            <div class="header-right">
+                <div class="action-icons">
+                    <button class="icon-btn" onclick="switchView('candidatos', document.querySelector('.menu a:nth-child(4)'))">
+                        <i data-lucide="message-circle"></i>
+                        <div class="badge" id="chat-badge">0</div>
+                    </button>
+                    <button class="icon-btn" onclick="requestNotificationPermission()">
+                        <i data-lucide="bell"></i>
+                        <div class="badge" id="noti-badge">!</div>
+                    </button>
+                </div>
+
+                <div class="user-profile">
+                    <span id="display-empresa" class="hide-mobile">Buscando...</span>
+                    <div class="avatar"><i data-lucide="building"></i></div>
+                </div>
+            </div>
+        </header>
+
+        <section id="view-home" class="view-section active">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div>
+                        <p style="color: var(--text-muted); font-weight: 600;">Vagas Abertas / Disponíveis</p>
+                        <div class="metric-val" id="count-vagas-abertas">0</div>
+                    </div>
+                    <i data-lucide="briefcase" style="color: var(--primary); width: 36px; height: 36px;"></i>
+                </div>
+            </div>
+
+            <div class="notification-box">
+                <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 8px;"><i data-lucide="bell" style="color: var(--warning);"></i> Notificações de Candidaturas</h3>
+                <div id="lista-notificacoes">
+                    <p style="color: var(--text-muted); font-size: 14px;">Nenhuma nova candidatura recebida recentemente.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-publicar" class="view-section">
+            <div class="card">
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <h2 id="step-title" style="margin-bottom: 20px;">Dados da Vaga</h2>
+                <form id="form-vaga" onsubmit="event.preventDefault();">
+                    
+                    <div class="step active" data-title="Dados da Vaga">
+                        <div class="form-group">
+                            <label>Título da Vaga *</label>
+                            <input type="text" id="vaga_titulo" class="form-control" placeholder="Ex: Desenvolvedor, Diarista..." required>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Tipo de Vaga *</label>
+                                <select id="vaga_tipo" class="form-control" required>
+                                    <option value="">Selecione...</option><option>CLT</option><option>PJ</option><option>Estágio</option><option>Jovem Aprendiz</option><option>Freelancer</option><option>Temporário</option><option>Diária</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Modalidade *</label>
+                                <select id="vaga_modalidade" class="form-control" required>
+                                    <option value="">Selecione...</option><option>Presencial</option><option>Remoto</option><option>Híbrido</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Localização">
+                        <div class="form-group">
+                            <label>CEP (Preenchimento Automático)</label>
+                            <input type="text" id="vaga_cep" class="form-control" placeholder="00000-000" maxlength="9">
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group"><label>Cidade *</label><input type="text" id="vaga_cidade" class="form-control" required></div>
+                            <div class="form-group"><label>Estado *</label><input type="text" id="vaga_estado" class="form-control" required></div>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Descrição">
+                        <div class="form-group">
+                            <label>Descrição detalhada da vaga *</label>
+                            <textarea id="vaga_desc" class="form-control" placeholder="Responsabilidades, atribuições e rotina..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Salário e Benefícios">
+                        <div class="form-group">
+                            <label>Faixa Salarial / Valor da Diária *</label>
+                            <input type="text" id="vaga_salario" class="form-control" placeholder="R$ 0,00" oninput="maskMoney(this)" required>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Habilidades Necessárias">
+                        <label style="margin-bottom: 12px; display: block; font-weight: 600;">Clique para fixar as habilidades requeridas:</label>
+                        <div class="tags-container" id="skills-container">
+                            <span class="tag" onclick="this.classList.toggle('selected')">Pontualidade</span>
+                            <span class="tag" onclick="this.classList.toggle('selected')">Boa Comunicação</span>
+                            <span class="tag" onclick="this.classList.toggle('selected')">Trabalho em Equipe</span>
+                            <span class="tag" onclick="this.classList.toggle('selected')">Experiência Comprovada</span>
+                        </div>
+                        <div class="form-grid" style="grid-template-columns: 1fr auto; gap: 10px;">
+                            <input type="text" id="new-skill-input" class="form-control" placeholder="Adicionar outra habilidade customizada...">
+                            <button type="button" class="btn btn-primary" onclick="addCustomSkill()" style="padding: 0 20px;">+</button>
+                        </div>
+                    </div>
+<a href="#" onclick="exibirEmailLogado()" style="cursor: pointer;">
+    <i data-lucide="briefcase"></i> 
+    <span>Vagas Cadastradas</span>
+</a>
+                    <div class="step" data-title="Processo Seletivo">
+                        <div class="form-group">
+                            <label>Data Limite de Inscrição *</label>
+                            <input type="date" id="vaga_data_limite" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Contato Corporativo">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>E-mail de Contato (Vinculado ao Login) *</label>
+                                <input type="email" id="vaga_email" class="form-control" readonly required>
+                            </div>
+                            <div class="form-group">
+                                <label>WhatsApp / Telefone de Contato *</label>
+                                <input type="text" id="vaga_telefone" class="form-control" placeholder="(00) 00000-0000" oninput="maskPhone(this)" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step" data-title="Revisão e Lançamento">
+                        <div style="background: #f8fafc; padding: 24px; border-radius: 12px; border: 1px solid var(--border-color);">
+                            <h3 id="resumo-titulo" style="color: var(--primary);">Título da Vaga</h3>
+                            <p id="resumo-detalhes" style="margin-top: 10px; font-size: 15px; color: var(--text-muted); line-height: 1.6;">
+                                Confirme os dados antes de prosseguir com a gravação.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="actions">
+                        <button type="button" class="btn btn-outline" id="btn-voltar" style="display: none;">Voltar</button>
+                        <div style="margin-left: auto;">
+                            <button type="button" class="btn btn-primary" id="btn-proximo">Próximo Passo</button>
+                            <button type="button" class="btn btn-success" id="btn-publicar" style="display: none;">Lançar Vaga</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="view-minhas-vagas" class="view-section">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Vagas Anunciadas por sua Empresa</h2>
+                <div id="container-minhas-vagas"><p style="color: var(--text-muted);">Carregando histórico de publicações...</p></div>
+            </div>
+        </section>
+
+        <section id="view-candidatos" class="view-section">
+            <div class="card">
+                <h2 style="margin-bottom: 20px;">Profissionais Candidatados</h2>
+                <div id="container-candidatos"><p style="color: var(--text-muted);">Aguardando sincronização de currículos recebidos...</p></div>
+            </div>
+        </section>
+
+        <section id="view-chat" class="view-section">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 id="chat-with-name">Sala de Mensagens</h2>
+                        <p id="chat-job-title" style="font-size: 14px; color: var(--text-muted);">Vaga selecionada</p>
+                    </div>
+                    <button class="btn btn-outline btn-sm" onclick="switchView('candidatos', document.querySelector('.menu a:nth-child(4)'))"><i data-lucide="arrow-left"></i> Voltar</button>
+                </div>
+                
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages-box"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="chat-input-text" class="form-control" style="margin-bottom: 0; flex: 1;" placeholder="Digite uma mensagem...">
+                        <button class="btn btn-primary" onclick="sendChatMessageEmpresa()"><i data-lucide="send"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+<div id="email-box" style="display:none; background:#fff; padding:10px; border:1px solid #ccc; position:absolute; z-index:1000;">
+    <p id="texto-email"></p>
+</div>
+
+<script>
+window.exibirEmailLogado = function() {
+    const box = document.getElementById('email-box');
+    const texto = document.getElementById('texto-email');
+    
+    if(auth.currentUser) {
+        texto.innerText = "Logado como: " + auth.currentUser.email;
+        box.style.display = 'block'; // Mostra a div
+        
+        // Esconde automaticamente após 3 segundos
+        setTimeout(() => box.style.display = 'none', 3000);
+    }
+};
+</script>
+    <div class="modal-overlay" id="popup-suporte">
+        <div class="popup-card" style="text-align: center;">
+            <i data-lucide="x" class="close-popup" onclick="closeSupport()"></i>
+            <h2 style="color: var(--primary); margin-bottom: 10px;">Suporte Técnico</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 20px;">Precisa de auxílio no painel? Entre em contato imediato com a nossa central.</p>
+            
+            <div class="support-row" style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; font-size: 16px; font-weight: 600;">
+                <a href="https://wa.me/5593999781579" target="_blank" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="phone" style="color: var(--primary);"></i>
+                    <i data-lucide="message-square" style="color: #10b981;"></i>
+                    <span>(93) 999781579</span>
+                </a>
+            </div>
+            <div class="support-row" style="font-size: 15px; margin-top: 10px; color: var(--text-muted); display: flex; justify-content: center; gap: 10px;">
+                <i data-lucide="mail"></i>
+                <span>vagas@gmail.com</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="popup-editar-vaga">
+        <div class="popup-card" style="text-align: left;">
+            <i data-lucide="x" class="close-popup" onclick="closeEditModal()"></i>
+            <h2 style="color: var(--primary); margin-bottom: 20px; text-align: center;">Editar Detalhes da Vaga</h2>
+            
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 14px;">Título da Vaga</label>
+                <input type="text" id="edit_vaga_titulo" class="form-control" placeholder="Título da vaga">
+            </div>
+            
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 14px;">Remuneração / Salário</label>
+                <input type="text" id="edit_vaga_salario" class="form-control" placeholder="R$ 0,00" oninput="maskMoney(this)">
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 14px;">Descrição / Atribuições</label>
+                <textarea id="edit_vaga_desc" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: 600; font-size: 14px;">Status da Vaga</label>
+                <select id="edit_vaga_status" class="form-control">
+                    <option value="Ativa">Ativa (Aberta para candidatos)</option>
+                    <option value="Preenchida">Preenchida (Fechada)</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 25px;">
+                <button type="button" class="btn btn-outline" onclick="closeEditModal()" style="flex: 1;">Cancelar</button>
+                <button type="button" class="btn btn-success" onclick="salvarEdicaoVaga()" style="flex: 1;"><i data-lucide="save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="popup-perfil-candidato">
+        <div class="popup-card" style="text-align: left; max-width: 600px;">
+            <i data-lucide="x" class="close-popup" onclick="fecharPerfil()"></i>
+            <h2 id="perfil-nome" style="color: var(--primary); margin-bottom: 5px; font-size: 22px;">Buscando Nome...</h2>
+            <p id="perfil-contato" style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;">Buscando contatos...</p>
+            
+            <div class="perfil-section">
+                <h4><i data-lucide="target" style="width: 16px;"></i> Objetivo / Resumo Profissional</h4>
+                <p id="perfil-resumo">Informação não fornecida.</p>
+            </div>
+
+            <div class="perfil-section">
+                <h4><i data-lucide="zap" style="width: 16px;"></i> Habilidades e Competências</h4>
+                <div id="perfil-habilidades">
+                    <p>Nenhuma habilidade cadastrada.</p>
+                </div>
+            </div>
+
+            <div class="perfil-section" style="border-bottom: none;">
+                <h4><i data-lucide="briefcase" style="width: 16px;"></i> Histórico e Experiências</h4>
+                <div id="perfil-experiencias">
+                    <p>Sem informações de histórico.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <div id="modal-perfil" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close-btn" onclick="fecharModal()">&times;</span>
+        <h3>Meu Perfil</h3>
+        <p id="email-usuario"></p>
+        <button id="logout-btn-modal" class="btn-sair">Sair da Conta</button>
+    </div>
+</div>
+
+
+<script type="module">
+    
+    window.verPerfilTrabalhador = async function(idTrabalhador) {
+        try {
+            const docRef = doc(db, "Trabalhadores", idTrabalhador);
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                const dados = docSnap.data();
+                console.log("Dados do candidato:", dados);
+                
+                // Exemplo de como preencher o seu modal:
+                document.getElementById('nome-modal').innerText = dados.dados_pessoais.nome;
+                document.getElementById('objetivo-modal').innerText = dados.objetivo;
+                // Continue preenchendo os outros campos...
+                
+                // Exibe o modal (assumindo que você tem um ID de modal)
+                document.getElementById('popup-perfil-candidato').style.display = 'block';
+            } else {
+                alert("Perfil não encontrado!");
+            }
+        } catch (e) {
+            console.error("Erro ao buscar:", e);
+            alert("Erro ao carregar perfil.");
+        }
+    }
+    
+    
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where, orderBy, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+        authDomain: "meuportaldevagas.firebaseapp.com",
+        projectId: "meuportaldevagas",
+        storageBucket: "meuportaldevagas.firebasestorage.app",
+        messagingSenderId: "77991933793",
+        appId: "1:77991933793:web:2e8df544915ce3dc463720"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let nomeEmpresaAtual = "";
+    let editingVagaId = null;
+    let currentChatRoomId = null;
+    let chatUnsubscribe = null;
+    
+    // Variável global para armazenar as vagas lidas e facilitar a edição
+    window.vagasGlobaisList = {};
+    
+    // --- AUTENTICAÇÃO E INICIALIZAÇÃO ---
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            try {
+                let docSnap = await getDoc(doc(db, "empresas", user.uid));
+                if (!docSnap.exists()) docSnap = await getDoc(doc(db, "Empresas", user.uid));
+                
+                if (docSnap.exists()) {
+                    nomeEmpresaAtual = docSnap.data().nomeFantasia || docSnap.data().nome || "Sua Empresa";
+                } else {
+                    nomeEmpresaAtual = user.email.split('@')[0].toUpperCase();
+                }
+
+                document.getElementById('display-empresa').innerText = nomeEmpresaAtual;
+                document.getElementById('vaga_email').value = user.email;
+
+                initRealtimeMetrics();
+                listenToConversasNotificacoes();
+                
+                if (Notification.permission === "default") {
+                    setTimeout(() => Notification.requestPermission(), 2000);
+                }
+            } catch (e) {
+                console.error("Falha ao obter perfil", e);
+            }
+        } else {
+            window.location.href = "escolha.html";
+        }
+    });
+
+    function dispararNotificacao(titulo, corpo) {
+        if (Notification.permission === "granted") {
+            new Notification(titulo, { body: corpo, icon: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" });
+        }
+    }
+
+    // --- LÓGICA DE NAVEGAÇÃO MULTI-STEP PARA PUBLICAR VAGA ---
+    let currentStep = 0;
+    const steps = document.querySelectorAll('.step');
+    const btnProximo = document.getElementById('btn-proximo');
+    const btnVoltar = document.getElementById('btn-voltar');
+    const btnPublicar = document.getElementById('btn-publicar');
+    const progressFill = document.getElementById('progress-fill');
+    const stepTitle = document.getElementById('step-title');
+
+    function updateFormSteps() {
+        steps.forEach((step, index) => step.classList.toggle('active', index === currentStep));
+        const progressPercentage = ((currentStep + 1) / steps.length) * 100;
+        progressFill.style.width = `${progressPercentage}%`;
+        stepTitle.innerText = steps[currentStep].getAttribute('data-title');
+        btnVoltar.style.display = currentStep > 0 ? 'inline-block' : 'none';
+        
+        if (currentStep === steps.length - 1) {
+            btnProximo.style.display = 'none';
+            btnPublicar.style.display = 'inline-block';
+            gerarResumoDaVaga();
+        } else {
+            btnProximo.style.display = 'inline-block';
+            btnPublicar.style.display = 'none';
+        }
+    }
+
+    function validarCamposDaEtapa() {
+        const inputsObrigatorios = steps[currentStep].querySelectorAll('input[required], select[required], textarea[required]');
+        for (let input of inputsObrigatorios) {
+            if (!input.value.trim()) {
+                alert("Por favor, preencha todos os campos obrigatórios (*) desta etapa.");
+                input.focus();
+                return false;
+            }
+        }
+        return true;
+    }
+
+    btnProximo.addEventListener('click', () => { if (validarCamposDaEtapa()) { currentStep++; updateFormSteps(); } });
+    btnVoltar.addEventListener('click', () => { currentStep--; updateFormSteps(); });
+
+    function gerarResumoDaVaga() {
+        const titulo = document.getElementById('vaga_titulo').value;
+        const cidade = document.getElementById('vaga_cidade').value;
+        const estado = document.getElementById('vaga_estado').value;
+        const salario = document.getElementById('vaga_salario').value;
+        const tipo = document.getElementById('vaga_tipo').value;
+        const modalidade = document.getElementById('vaga_modalidade').value;
+        document.getElementById('resumo-titulo').innerText = titulo;
+        document.getElementById('resumo-detalhes').innerHTML = `
+            <strong>Localização:</strong> ${cidade}/${estado} <br>
+            <strong>Remuneração:</strong> ${salario} <br>
+            <strong>Contrato:</strong> ${tipo} - ${modalidade} <br><br>
+            <i>Revise tudo e clique em "Lançar Vaga" para publicar!</i>
+        `;
+    }
+
+    btnPublicar.addEventListener('click', async () => {
+        btnPublicar.disabled = true;
+        btnPublicar.innerText = "Lançando...";
+        const tagsSelecionadas = Array.from(document.querySelectorAll('#skills-container .tag.selected')).map(tag => tag.innerText);
+
+        const vagaDados = {
+            id_empresa: currentUser.uid,
+            nome_empresa: nomeEmpresaAtual,
+            titulo: document.getElementById('vaga_titulo').value.trim(),
+            tipo: document.getElementById('vaga_tipo').value,
+            modalidade: document.getElementById('vaga_modalidade').value,
+            cep: document.getElementById('vaga_cep').value.replace(/\D/g, ''),
+            cidade: document.getElementById('vaga_cidade').value.trim(),
+            estado: document.getElementById('vaga_estado').value.trim(),
+            descricao: document.getElementById('vaga_desc').value.trim(),
+            salario: document.getElementById('vaga_salario').value.trim(),
+            habilidades: tagsSelecionadas,
+            data_limite: document.getElementById('vaga_data_limite').value,
+            email_contato: document.getElementById('vaga_email').value.trim(),
+            telefone_contato: document.getElementById('vaga_telefone').value.trim(),
+            status: "Ativa",
+            data_publicacao: serverTimestamp()
+        };
+        try {
+            // Cria um ID juntando o nome da empresa e a vaga (Ex: "Padaria Central - Padeiro")
+            const idDaVaga = `${nomeEmpresaAtual} - ${vagaDados.titulo}`;
+            await setDoc(doc(db, "vagas", idDaVaga), vagaDados);
+            alert("Sua vaga foi anunciada com sucesso no Portal de Vagas!");
+            document.getElementById('form-vaga').reset();
+            currentStep = 0;
+            updateFormSteps();
+            switchView('minhas-vagas', document.querySelector('.menu a:nth-child(3)'));
+        } catch (error) {
+            console.error(error);
+            alert("Não foi possível lançar a vaga no momento.");
+        } finally {
+            btnPublicar.disabled = false;
+            btnPublicar.innerText = "Lançar Vaga";
+        }
+    });
+
+    window.addCustomSkill = function() {
+        const input = document.getElementById('new-skill-input');
+        const valor = input.value.trim();
+        if (valor) {
+            const span = document.createElement('span');
+            span.className = 'tag selected';
+            span.innerText = valor;
+            span.onclick = function() { this.classList.toggle('selected'); };
+            document.getElementById('skills-container').appendChild(span);
+            input.value = '';
+        }
+    };
+
+    document.getElementById('vaga_cep').addEventListener('blur', async (e) => {
+        let cep = e.target.value.replace(/\D/g, '');
+        if (cep.length === 8) {
+            try {
+                const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await res.json();
+                if (!data.erro) {
+                    document.getElementById('vaga_cidade').value = data.localidade;
+                    document.getElementById('vaga_estado').value = data.uf;
+                    e.target.value = cep.replace(/^(\d{5})(\d{3})/, "$1-$2");
+                }
+            } catch (err) {}
+        }
+    });
+    
+    // --- MENU LATERAL E NAVEGAÇÃO ---
+    window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); }
+    window.switchView = function(viewId, element) {
+        if (element) {
+            document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+            element.classList.add('active');
+        }
+        document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(`view-${viewId}`).classList.add('active');
+        const titles = { home: 'Dashboard Inicial', publicar: 'Publicar / Atualizar Vaga', 'minhas-vagas': 'Minhas Publicações', candidatos: 'Candidatos Encontrados', chat: 'Canal Direto de Atendimento' };
+        document.getElementById('header-title').innerText = titles[viewId] || 'Painel Operacional';
+        document.getElementById('sidebar').classList.remove('open');
+        if (viewId === 'minhas-vagas') loadMinhasVagas();
+        if (viewId === 'candidatos') loadCandidatosRecebidos();
+    }
+
+    // --- MÁSCARAS DE ENTRADA ---
+    window.maskMoney = function(input) {
+        let value = input.value.replace(/\D/g, "");
+        if (!value) { input.value = ""; return; }
+        value = (parseFloat(value) / 100).toFixed(2).replace(".", ",");
+        value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        input.value = "R$ " + value;
+    }
+
+    window.maskPhone = function(input) {
+        let value = input.value.replace(/\D/g, "");
+        if (value.length > 11) value = value.slice(0, 11);
+        if (value.length > 6) { input.value = `(${value.slice(0,2)}) ${value.slice(2,7)}-${value.slice(7)}`; } 
+        else if (value.length > 2) { input.value = `(${value.slice(0,2)}) ${value.slice(2)}`; } 
+        else if (value.length > 0) { input.value = `(${value}`; }
+    }
+
+    // --- MODAIS GERAIS ---
+    window.openSupport = function() { document.getElementById('popup-suporte').classList.add('active'); }
+    window.closeSupport = function() { document.getElementById('popup-suporte').classList.remove('active'); }
+
+    // --- APRIMORAMENTO: EDIÇÃO DE VAGA COMPLETA ---
+    window.abrirModalEdicao = function(id) {
+        const vaga = window.vagasGlobaisList[id];
+        if(!vaga) return;
+
+        editingVagaId = id;
+        document.getElementById('edit_vaga_titulo').value = vaga.titulo;
+        document.getElementById('edit_vaga_salario').value = vaga.salario;
+        document.getElementById('edit_vaga_desc').value = vaga.descricao || "";
+        document.getElementById('edit_vaga_status').value = vaga.status || "Ativa";
+        document.getElementById('popup-editar-vaga').classList.add('active');
+    }
+
+    window.closeEditModal = function() {
+        editingVagaId = null;
+        document.getElementById('popup-editar-vaga').classList.remove('active');
+    }
+
+    window.salvarEdicaoVaga = async function() {
+        if (!editingVagaId) return;
+        const novoTitulo = document.getElementById('edit_vaga_titulo').value.trim();
+        const novoSalario = document.getElementById('edit_vaga_salario').value.trim();
+        const novaDescricao = document.getElementById('edit_vaga_desc').value.trim();
+        const novoStatus = document.getElementById('edit_vaga_status').value;
+        if (!novoTitulo || !novoSalario) { alert("Preencha título e salário obrigatórios."); return; }
+
+        try {
+            await updateDoc(doc(db, "vagas", editingVagaId), { 
+                titulo: novoTitulo, 
+                salario: novoSalario,
+                descricao: novaDescricao,
+                status: novoStatus
+            });
+            closeEditModal();
+            loadMinhasVagas();
+        } catch (error) {
+            alert("Não foi possível salvar as alterações.");
+        }
+    }
+
+    // --- NOVO: EXCLUIR VAGA DEFINITIVAMENTE ---
+    window.excluirVaga = async function(id) {
+        if(confirm("ATENÇÃO: Você tem certeza que deseja EXCLUIR essa vaga permanentemente? Esta ação não pode ser desfeita.")) {
+            try {
+                await deleteDoc(doc(db, "vagas", id));
+                alert("Vaga excluída com sucesso.");
+                loadMinhasVagas();
+            } catch(e) {
+                console.error(e);
+                alert("Erro ao tentar excluir a vaga. Verifique suas permissões.");
+            }
+        }
+    }
+
+    // --- CARREGAR MINHAS VAGAS ---
+    async function loadMinhasVagas() {
+        const box = document.getElementById('container-minhas-vagas');
+        box.innerHTML = "<p>Sincronizando...</p>";
+        try {
+            const q = query(collection(db, "vagas"), where("id_empresa", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            if (snap.empty) { box.innerHTML = "<p style='color:var(--text-muted);'>Nenhuma publicação efetuada.</p>"; return; }
+            
+            box.innerHTML = "";
+            window.vagasGlobaisList = {}; // Limpa cache atual
+
+            snap.forEach(documento => {
+                const v = documento.data();
+                const id = documento.id;
+                window.vagasGlobaisList[id] = v; // Guarda no cache para o modal de edição
+
+                const div = document.createElement('div');
+                div.className = "list-item";
+                
+                // Trata a cor do badge dependendo do status
+                const classeBadge = (v.status === "Preenchida") ? "preenchida" : "ativa";
+
+                div.innerHTML = `
+                    <div>
+                        <h3 style="margin-bottom: 5px;">${v.titulo}</h3>
+                        <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">${v.cidade}/${v.estado} — ${v.tipo} — <strong>${v.salario}</strong></p>
+                        <div style="margin-top:8px;">
+                            <span class="status-badge ${classeBadge}">${v.status || "Ativa"}</span>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-outline btn-sm" onclick="abrirModalEdicao('${id}')"><i data-lucide="edit"></i> Editar</button>
+                        <button class="btn btn-danger btn-sm" onclick="excluirVaga('${id}')"><i data-lucide="trash-2"></i> Excluir</button>
+                    </div>
+                `;
+                box.appendChild(div);
+            });
+            lucide.createIcons();
+        } catch (e) { console.error(e); }
+    }
+
+    // --- CARREGAR CANDIDATOS E FUNÇÕES DE DISPENSAR E VER PERFIL ---
+    async function loadCandidatosRecebidos() {
+        const box = document.getElementById('container-candidatos');
+        box.innerHTML = "<p>Sincronizando...</p>";
+        try {
+            const q = query(collection(db, "candidaturas"), where("id_empresa", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            if (snap.empty) { box.innerHTML = "<p style='color:var(--text-muted);'>Nenhum candidato ainda.</p>"; return; }
+            
+            box.innerHTML = "";
+            
+            // CORREÇÃO: Removido o erro das variáveis idEmpresa/idTrabalhador que quebravam o código.
+            snap.forEach(documento => {
+                const cand = documento.data();
+                const candId = documento.id; // ID do documento na coleção 'candidaturas'
+
+                const div = document.createElement('div');
+                div.className = "list-item";
+                div.innerHTML = `
+                    <div>
+                        <h3 style="margin-bottom: 5px;">${cand.nome_trabalhador}</h3>
+                        <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Candidatou-se à vaga: <strong>${cand.titulo_vaga}</strong></p>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-outline btn-sm" onclick="verPerfilTrabalhador('${cand.id_trabalhador}')"><i data-lucide="file-text"></i> Ver Perfil</button>
+                        
+                        <button class="btn btn-primary btn-sm" onclick="openChatView('${cand.id_trabalhador}', '${cand.nome_trabalhador}', '${cand.titulo_vaga}')"><i data-lucide="message-square"></i> Abrir Chat</button>
+                        
+                        <button class="btn btn-outline btn-sm" style="color: var(--danger); border-color: var(--danger);" onclick="dispensarCandidato('${candId}')"><i data-lucide="user-x"></i> Dispensar</button>
+                    </div>
+                `;
+                box.appendChild(div);
+            });
+            lucide.createIcons();
+        } catch (e) { console.error(e); }
+    }
+
+    // --- NOVO: DISPENSAR CANDIDATO ---
+    window.dispensarCandidato = async function(idDocumentoCandidatura) {
+        if(confirm("Tem certeza que deseja dispensar este candidato e remover a candidatura da sua lista?")) {
+            try {
+                await deleteDoc(doc(db, "candidaturas", idDocumentoCandidatura));
+                alert("Candidato dispensado com sucesso.");
+                loadCandidatosRecebidos();
+            } catch(e) {
+                console.error(e);
+                alert("Erro ao tentar dispensar o candidato.");
+            }
+        }
+    }
+
+    // --- NOVO: VER PERFIL DO TRABALHADOR ---
+    window.verPerfilTrabalhador = async function(uidTrabalhador) {
+        document.getElementById('popup-perfil-candidato').classList.add('active');
+        document.getElementById('perfil-nome').innerText = "Buscando dados...";
+        document.getElementById('perfil-contato').innerText = "";
+        document.getElementById('perfil-resumo').innerText = "Carregando...";
+        document.getElementById('perfil-habilidades').innerHTML = "";
+        document.getElementById('perfil-experiencias').innerHTML = "";
+
+        try {
+            // Busca o trabalhador pelo UID na coleção 'Trabalhadores'
+            const q = query(collection(db, "Trabalhadores"), where("uid", "==", uidTrabalhador));
+            const snap = await getDocs(q);
+            
+            if(!snap.empty) {
+                const dadosTrabalhador = snap.docs[0].data();
+                
+                // Mapeia dependendo da estrutura salva (Trabalhadores.html ou 1Home.html)
+                const nome = dadosTrabalhador.dados_pessoais?.nome || dadosTrabalhador.nome || "Não informado";
+                const tel = dadosTrabalhador.dados_pessoais?.telefone || dadosTrabalhador.telefone || "Telefone não informado";
+                const email = dadosTrabalhador.dados_pessoais?.email || dadosTrabalhador.email || "E-mail não informado";
+                const cidade = dadosTrabalhador.dados_pessoais?.cidade_estado || dadosTrabalhador.cidade || "Localização não informada";
+                
+                const resumo = dadosTrabalhador.objetivo || dadosTrabalhador.resumo || "Não preencheu um resumo ou objetivo.";
+                let habilidadesHTML = "";
+                let experienciasHTML = "";
+                
+                // Trata habilidades (Pode ser array ou texto direto)
+                if(Array.isArray(dadosTrabalhador.habilidades) && dadosTrabalhador.habilidades.length > 0) {
+                    habilidadesHTML = dadosTrabalhador.habilidades.map(h => `<span class="skill-badge">${h}</span>`).join('');
+                } else if(typeof dadosTrabalhador.habilidades === 'string' && dadosTrabalhador.habilidades.trim() !== '') {
+                    habilidadesHTML = `<span class="skill-badge">${dadosTrabalhador.habilidades}</span>`;
+                } else {
+                    habilidadesHTML = "<p>Nenhuma habilidade cadastrada.</p>";
+                }
+
+                // Trata experiências (Geralmente array na estrutura do gerador completo)
+                if(Array.isArray(dadosTrabalhador.experiencias) && dadosTrabalhador.experiencias.length > 0) {
+                    experienciasHTML = dadosTrabalhador.experiencias.map(exp => `
+                        <div style="margin-bottom: 12px; background: #f8fafc; padding: 10px; border-radius: 8px;">
+                            <strong style="color: var(--text-main);">${exp.cargo} na empresa ${exp.empresa}</strong>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">Período: ${exp.inicio} até ${exp.fim}</p>
+                            <p style="font-size: 13px;">${exp.desc}</p>
+                        </div>
+                    `).join('');
+                } else {
+                    experienciasHTML = "<p>Sem registro de histórico ou experiências cadastradas.</p>";
+                }
+
+                document.getElementById('perfil-nome').innerText = nome;
+                document.getElementById('perfil-contato').innerHTML = `
+                    <i data-lucide="mail" style="width: 14px; margin-right: 4px;"></i> ${email} &nbsp;|&nbsp;
+                    <i data-lucide="phone" style="width: 14px; margin-right: 4px;"></i> ${tel} &nbsp;|&nbsp;
+                    <i data-lucide="map-pin" style="width: 14px; margin-right: 4px;"></i> ${cidade}
+                `;
+                document.getElementById('perfil-resumo').innerText = resumo;
+                document.getElementById('perfil-habilidades').innerHTML = habilidadesHTML;
+                document.getElementById('perfil-experiencias').innerHTML = experienciasHTML;
+
+                lucide.createIcons(); // Recarrega icones gerados
+
+            } else {
+                document.getElementById('perfil-nome').innerText = "Perfil não encontrado";
+                document.getElementById('perfil-resumo').innerText = "Este candidato pode ter deletado a própria conta ou o perfil não está público no momento.";
+            }
+        } catch(e) {
+            console.error("Erro ao buscar perfil", e);
+            document.getElementById('perfil-nome').innerText = "Erro ao carregar dados.";
+        }
+    }
+
+    window.fecharPerfil = function() {
+        document.getElementById('popup-perfil-candidato').classList.remove('active');
+    }
+
+    // --- MENSAGENS E ALERTAS ---
+    function listenToConversasNotificacoes() {
+        const q = query(collection(db, "conversas"), where("id_empresa", "==", currentUser.uid));
+        onSnapshot(q, (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "modified" || change.type === "added") {
+                    const data = change.doc.data();
+                    if (data.last_sender === "trabalhador") {
+                        document.getElementById('noti-badge').classList.add('active');
+                        document.getElementById('chat-badge').classList.add('active');
+                        document.getElementById('chat-badge').innerText = "!";
+                        dispararNotificacao("Nova Mensagem no Portal", `Você tem uma nova mensagem de um candidato.`);
+                    }
+                }
+            });
+        });
+    }
+
+    // CORREÇÃO: Função openChatView refeita para interligar de verdade com a conversa do BD
+    window.openChatView = async function(idTrabalhador, nomeTrabalhador, tituloVaga) {
+        switchView('chat', null);
+        document.getElementById('chat-with-name').innerText = nomeTrabalhador;
+        document.getElementById('chat-job-title').innerText = `Vaga: ${tituloVaga}`;
+        document.getElementById('noti-badge').classList.remove('active');
+        document.getElementById('chat-badge').classList.remove('active');
+
+        if (chatUnsubscribe) chatUnsubscribe();
+        
+        // Busca a conversa exata no BD criada pelo candidato
+        const q = query(collection(db, "conversas"), 
+            where("id_empresa", "==", currentUser.uid),
+            where("id_trabalhador", "==", idTrabalhador),
+            where("titulo_vaga", "==", tituloVaga)
+        );
+        
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            currentChatRoomId = snap.docs[0].id;
+        } else {
+            console.error("Sala de chat não encontrada.");
+            return;
+        }
+
+        const msgQuery = query(collection(db, "conversas", currentChatRoomId, "mensagens"), orderBy("timestamp", "asc"));
+        chatUnsubscribe = onSnapshot(msgQuery, (snapshot) => {
+            const box = document.getElementById('chat-messages-box');
+            box.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                const msg = docSnap.data();
+                const div = document.createElement('div');
+                div.className = `message ${msg.remetente === 'empresa' ? 'empresa' : 'trabalhador'}`;
+                div.innerText = msg.texto;
+                box.appendChild(div);
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+
+    // Função para enviar mensagem (Empresa)
+    window.sendChatMessageEmpresa = async function() {
+        const input = document.getElementById('chat-input-text');
+        const text = input.value.trim();
+        
+        if (!text || !currentChatRoomId) return;
+        try {
+            await addDoc(collection(db, "conversas", currentChatRoomId, "mensagens"), {
+                remetente: "empresa", 
+                texto: text,
+                timestamp: serverTimestamp()
+            });
+            input.value = ""; // Limpa o campo após o envio
+        } catch (e) {
+            console.error("Erro ao enviar mensagem:", e);
+            alert("Erro ao enviar mensagem.");
+        }
+    }
+
+    // Adiciona o evento de tecla Enter no campo de chat
+    const chatInput = document.getElementById('chat-input-text');
+    if (chatInput) {
+        chatInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                window.sendChatMessageEmpresa();
+            }
+        });
+    }
+
+    document.getElementById('btn-logout').addEventListener('click', (e) => {
+        e.preventDefault();
+        signOut(auth).then(() => window.location.replace("escolha.html"));
+    });
+    
+    function initRealtimeMetrics() {
+        const qVagas = query(collection(db, "vagas"), where("id_empresa", "==", currentUser.uid), where("status", "==", "Ativa"));
+        onSnapshot(qVagas, (snap) => {
+            document.getElementById('count-vagas-abertas').innerText = snap.size;
+        });
+        const qCand = query(collection(db, "candidaturas"), where("id_empresa", "==", currentUser.uid), orderBy("data_candidatura", "desc"));
+        onSnapshot(qCand, (snap) => {
+            const container = document.getElementById('lista-notificacoes');
+            if (snap.empty) {
+                container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Aguardando notificações...</p>`;
+                return;
+            }
+            container.innerHTML = "";
+            snap.forEach(docSnap => {
+                const c = docSnap.data();
+                const item = document.createElement('div');
+                item.className = "noti-item";
+                item.innerHTML = `<div><strong>${c.nome_trabalhador}</strong> se candidatou para a vaga de <strong>${c.titulo_vaga}</strong></div><i data-lucide="chevron-right" style="color:var(--primary)"></i>`;
+                item.onclick = () => switchView('candidatos', document.querySelector('.menu a:nth-child(4)'));
+                container.appendChild(item);
+            });
+            lucide.createIcons();
+        });
+    }
+
+    lucide.createIcons();
+</script>
+</body>
+</html>
