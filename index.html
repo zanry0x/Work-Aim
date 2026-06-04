@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Portal de Vagas | Trabalhador</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --bg-body: #f1f5f9;
+            --sidebar-bg: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --danger: #ef4444;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; height: 100vh; background-color: var(--bg-body); color: var(--text-main); overflow: hidden; }
+
+        /* Sidebar & Mobile Menu */
+        .sidebar { width: 280px; background: var(--sidebar-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; padding: 32px 20px; flex-shrink: 0; z-index: 50; transition: 0.3s ease; }
+        .sidebar h2 { font-size: 18px; font-weight: 800; margin-bottom: 40px; display: flex; align-items: center; gap: 10px; color: var(--primary); }
+        .menu { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+        .menu a { text-decoration: none; color: var(--text-muted); padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; transition: 0.2s; cursor: pointer; }
+        .menu a.active, .menu a:hover { background: var(--primary); color: white; }
+        .btn-logout { margin-top: auto; color: var(--danger) !important; display: none; }
+        .btn-logout:hover { background: #fef2f2 !important; color: var(--danger) !important; }
+
+        .mobile-menu-btn { display: none; background: transparent; border: none; cursor: pointer; color: var(--text-main); padding: 5px; }
+
+        /* Main e Topbar */
+        .main { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; width: 100%; }
+        .topbar { background: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 5; gap: 15px; }
+        
+        /* Search Area */
+        .search-container { flex: 0.8; display: flex; background: var(--bg-body); border-radius: 12px; border: 1px solid var(--border-color); overflow: hidden; }
+        .input-group { flex: 1; display: flex; align-items: center; padding: 0 15px; border-right: 1px solid var(--border-color); background: #fff;}
+        .input-group i { color: var(--text-muted); width: 18px; }
+        .input-group input { width: 100%; padding: 12px; border: none; outline: none; font-size: 14px; background: transparent;}
+        .btn-search { padding: 0 24px; background: var(--primary); color: white; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-search:hover { background: #4338ca; }
+
+        /* Ícones de Notificação */
+        .action-icons { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { width: 45px; height: 45px; border-radius: 50%; background: var(--bg-body); display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; transition: 0.2s; border: none; }
+        .icon-btn:hover { background: #e2e8f0; }
+        .badge { position: absolute; top: -2px; right: -2px; background: var(--danger); color: white; font-size: 11px; font-weight: bold; width: 20px; height: 20px; border-radius: 50%; justify-content: center; align-items: center; border: 2px solid #fff; display: none; }
+        .badge.active { display: flex; }
+
+        /* Content Sections */
+        .content-section { padding: 30px; max-width: 1000px; margin: 0 auto; width: 100%; display: none; }
+        .content-section.active { display: block; }
+
+        /* Feed de Vagas & Cards */
+        .vaga-card, .candidatura-card { background: #fff; padding: 24px; border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .vaga-card:hover, .candidatura-card:hover { border-color: var(--primary); }
+        .btn-candidatar, .btn-action { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-candidatar:hover, .btn-action:hover { opacity: 0.9; }
+
+        /* Forms (Currículo e Dinâmicos) */
+        .form-group { margin-bottom: 20px; width: 100%; }
+        .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text-main); }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; background: #fff; }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: var(--primary); }
+        .form-card { background: #fff; padding: 30px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow); margin-bottom: 20px; }
+        .form-grid-cv { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        .section-title-cv { font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; color: var(--text-main); border-left: 4px solid var(--primary); padding-left: 10px; }
+        
+        .dynamic-item { background: #f8fafc; border: 1px dashed var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; position: relative; }
+        .btn-remove { position: absolute; top: 10px; right: 10px; background: var(--danger); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-add { background: transparent; color: var(--primary); border: 2px dashed var(--primary); width: 100%; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .btn-add:hover { background: var(--primary-light); }
+        .skill-tag { background: var(--primary-light); color: var(--primary); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin: 4px; }
+        .skill-tag span { cursor: pointer; color: var(--danger); }
+
+        /* Pop-up Suporte e Modais */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.2s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .support-modal { background: #fff; width: 350px; border-radius: 16px; padding: 24px; text-align: center; position: relative; box-shadow: var(--shadow-lg); }
+        .support-modal .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; cursor: pointer; color: var(--text-muted); }
+        .support-modal h2 { color: #2563eb; font-size: 20px; margin-bottom: 10px; font-weight: 700; }
+        .support-modal p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
+        .support-contact { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 10px; font-weight: 600; color: var(--text-main); text-decoration: none; }
+        .support-contact i { color: #2563eb; width: 20px; }
+        .support-contact i.wa { color: #10b981; }
+
+        /* Modais de Perfil Empresa e Vaga */
+        .popup-card { background: #fff; padding: 32px; border-radius: 16px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: var(--shadow-lg); text-align: left; }
+        .close-popup { position: absolute; top: 16px; right: 16px; cursor: pointer; color: var(--text-muted); background: none; border: none; }
+        .perfil-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
+        .perfil-section h4 { color: var(--text-main); font-size: 14px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .perfil-section p { color: var(--text-muted); font-size: 13.5px; line-height: 1.5; }
+
+        /* Chat System */
+        .chat-overlay { position: fixed; right: -400px; top: 0; width: 380px; height: 100%; background: #fff; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: 0.3s ease; display: flex; flex-direction: column; z-index: 100; border-left: 1px solid var(--border-color); }
+        .chat-overlay.open { right: 0; }
+        .chat-header { padding: 20px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; }
+        .chat-list { flex: 1; overflow-y: auto; background: var(--bg-body); }
+        .chat-item { padding: 15px 20px; background: #fff; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .active-chat-area { display: none; flex-direction: column; height: 100%; position: absolute; top: 0; left: 0; width: 100%; background: #fff; z-index: 101; }
+        .active-chat-area.visible { display: flex; }
+        .messages-box { flex: 1; padding: 15px; overflow-y: auto; background: var(--bg-body); display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 13.5px; }
+        .msg-empresa { background: #e2e8f0; color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg-trabalhador { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input { padding: 15px; background: #fff; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+        .chat-input input { flex: 1; padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 20px; outline: none; }
+        .chat-input button { background: var(--primary); color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; }
+
+       /* Media Queries */
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -100%; height: 100vh; box-shadow: var(--shadow-lg); }
+            .sidebar.open { left: 0; }
+            .mobile-menu-btn { display: block; }
+            
+            /* --- CORREÇÕES DO CABEÇALHO --- */
+            .topbar { flex-wrap: wrap; padding: 15px; gap: 15px; }
+            
+            /* Removemos o margin-top negativo e empurramos os ícones para a direita */
+            .action-icons { width: auto; margin-top: 0; margin-left: auto; justify-content: flex-end; }
+            
+            /* A barra de pesquisa agora ocupa 100% da tela e vai para a linha de baixo (order: 3) */
+            .search-container { flex-direction: column; border-radius: 8px; border: none; background: transparent; width: 100%; order: 3; }
+            
+            .input-group { border-right: none; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 5px; background: #fff; }
+            .btn-search { padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 10px; box-sizing: border-box; }
+            /* ------------------------------ */
+
+            .btn-candidatar { width: 100%; justify-content: center; }
+            .chat-overlay { width: 100%; right: -100%; }
+            .form-grid-cv { grid-template-columns: 1fr; }
+            .full-width { grid-column: span 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar" id="sidebar">
+        <h2><i data-lucide="zap"></i> <span>PortalVagas</span></h2>
+        <nav class="menu">
+            <a onclick="switchTab('vagas', this)" class="active"><i data-lucide="layout-grid"></i> <span>Início / Vagas</span></a>
+            <a onclick="switchTab('candidaturas', this)" class="auth-required"><i data-lucide="send"></i> <span>Minhas Candidaturas</span></a>
+            <a onclick="switchTab('curriculo', this)" class="auth-required"><i data-lucide="file-user"></i> <span>Meu Currículo</span></a>
+            <div style="margin: 20px 0; border-top: 1px solid var(--border-color);"></div>
+            <a onclick="openSupport()"><i data-lucide="settings"></i> <span>Configurações (Suporte)</span></a>
+            <a href="#" id="logout-btn" class="btn-logout"><i data-lucide="log-out"></i> <span>Sair da Conta</span></a>
+        </nav>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i data-lucide="menu"></i></button>
+            
+            <div class="search-container" id="search-box">
+                <div class="input-group">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="search-cargo" list="cargos-list" placeholder="Cargo ou serviço">
+                    <datalist id="cargos-list"></datalist>
+                </div>
+                <div class="input-group">
+                    <i data-lucide="map-pin"></i>
+                    <input type="text" id="search-cidade" list="cidades-list" placeholder="Cidade">
+                    <datalist id="cidades-list"></datalist>
+                </div>
+                <button class="btn-search" onclick="filterVagas()">Buscar</button>
+            </div>
+
+            <div class="action-icons">
+                <button class="icon-btn auth-required" onclick="toggleChatPanel()">
+                    <i data-lucide="message-circle"></i>
+                    <div class="badge" id="chat-badge">!</div>
+                </button>
+                <button class="icon-btn auth-required" onclick="requestNotificationPermission()">
+                    <i data-lucide="bell"></i>
+                    <div class="badge" id="noti-badge">!</div>
+                </button>
+            </div>
+        </header>
+
+        <section class="content-section active" id="sec-vagas">
+            <div style="margin-bottom: 30px;">
+                <h1 id="user-name">Bem-vindo, Visitante</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Confira as oportunidades ativas mais recentes.</p>
+            </div>
+            <div id="vagas-feed"></div>
+        </section>
+
+        <section class="content-section" id="sec-candidaturas">
+            <div style="margin-bottom: 30px;">
+                <h1>Minhas Candidaturas</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Acompanhe as vagas e converse com as empresas diretamente por aqui.</p>
+            </div>
+            <div id="candidaturas-feed"></div>
+        </section>
+
+        <section class="content-section" id="sec-curriculo">
+            <div style="margin-bottom: 30px;">
+                <h1>Meu Currículo Completo</h1>
+                <p style="color: var(--text-muted); margin-top: 5px;">Mantenha seus dados sempre atualizados. As empresas verão estas informações ao analisar seu perfil.</p>
+            </div>
+            
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="user"></i> Dados Pessoais & Contato</div>
+                <div class="form-grid-cv">
+                    <div class="form-group full-width">
+                        <label>Nome Completo</label>
+                        <input type="text" id="cur-nome">
+                    </div>
+                    <div class="form-group">
+                        <label>E-mail (Se alterar, o login mudará)</label>
+                        <input type="email" id="cur-email">
+                    </div>
+                    <div class="form-group">
+                        <label>Redefinir Senha (Opcional)</label>
+                        <input type="password" id="cur-senha" placeholder="Digite apenas se quiser mudar a senha">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone / WhatsApp</label>
+                        <input type="text" id="cur-telefone" placeholder="(00) 00000-0000">
+                    </div>
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" id="cur-cep" placeholder="00000-000">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade / Estado</label>
+                        <input type="text" id="cur-cidade">
+                    </div>
+                    <div class="form-group">
+                        <label>Endereço Completo</label>
+                        <input type="text" id="cur-endereco">
+                    </div>
+                    <div class="form-group">
+                        <label>Nacionalidade</label>
+                        <input type="text" id="cur-nac">
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn / Portfolio</label>
+                        <input type="text" id="cur-links">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="target"></i> Objetivo Profissional</div>
+                <div class="form-group">
+                    <textarea id="cur-objetivo" rows="4" placeholder="Fale sobre suas metas e resumos profissionais..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="graduation-cap"></i> Formação Acadêmica</div>
+                <div id="curFormacaoContainer"></div>
+                <button type="button" class="btn-add" onclick="addFormacaoCV()"><i data-lucide="plus"></i> Adicionar Formação</button>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="briefcase"></i> Experiência Profissional</div>
+                <div id="curExperienciaContainer"></div>
+                <button type="button" class="btn-add" onclick="addExperienciaCV()"><i data-lucide="plus"></i> Adicionar Experiência</button>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="zap"></i> Habilidades & Competências</div>
+                <div class="form-grid-cv" style="grid-template-columns: 1fr auto; align-items: end;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <input type="text" id="skillInputCV" placeholder="Ex: Eletricista, Trabalho em Equipe...">
+                    </div>
+                    <button type="button" class="btn-action" onclick="addSkillManualCV()" style="height: 44px;">Adicionar</button>
+                </div>
+                <div id="skillsListCV" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+
+            <div class="form-card">
+                <div class="section-title-cv"><i data-lucide="award"></i> Certificados</div>
+                <div id="curCertificadoContainer"></div>
+                <button type="button" class="btn-add" onclick="addCertificadoCV()"><i data-lucide="plus"></i> Adicionar Certificado</button>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button class="btn-action" id="btnSalvarCV" onclick="saveCurriculoCompleto()" style="padding: 15px 30px; font-size: 16px;">
+                    <i data-lucide="save"></i> Salvar e Atualizar Meu Perfil
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="support-modal">
+        <div class="support-modal">
+            <button class="close-btn" onclick="closeSupport()"><i data-lucide="x"></i></button>
+            <h2>Suporte Técnico</h2>
+            <p>Precisa de auxílio no painel? Entre em contato imediato com a nossa central.</p>
+            <a href="tel:+5593999781579" class="support-contact"><i data-lucide="phone"></i> (93) 999781579</a>
+            <a href="https://api.whatsapp.com/send?phone=5593999781579&text=Olá,%20preciso%20de%20suporte%20no%20PortalVagas" target="_blank" class="support-contact"><i data-lucide="message-circle" class="wa"></i> (93) 999781579</a>
+            <div class="support-contact" style="margin-top: 10px;"><i data-lucide="mail"></i> vagas@gmail.com</div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="popup-perfil-empresa">
+        <div class="popup-card">
+            <button class="close-popup" onclick="fecharModal('popup-perfil-empresa')"><i data-lucide="x"></i></button>
+            <h2 id="p-emp-nome" style="color: var(--primary); margin-bottom: 5px; font-size: 22px;">Buscando...</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;"><i data-lucide="building-2" style="width: 14px;"></i> Perfil Corporativo</p>
+            
+            <div class="perfil-section">
+                <h4><i data-lucide="file-text" style="width: 16px;"></i> Sobre a Empresa</h4>
+                <p id="p-emp-sobre">Aguarde...</p>
+            </div>
+            <div class="perfil-section">
+                <h4><i data-lucide="briefcase" style="width: 16px;"></i> Segmento / Área de Atuação</h4>
+                <p id="p-emp-seg">Aguarde...</p>
+            </div>
+            <div class="perfil-section">
+                <h4><i data-lucide="map-pin" style="width: 16px;"></i> Localização</h4>
+                <p id="p-emp-loc">Aguarde...</p>
+            </div>
+            <div class="perfil-section">
+                <h4><i data-lucide="mail" style="width: 16px;"></i> E-mail de Contato</h4>
+                <p id="p-emp-email">Aguarde...</p>
+            </div>
+            <div class="perfil-section" style="border-bottom: none;">
+                <h4><i data-lucide="hash" style="width: 16px;"></i> CNPJ</h4>
+                <p id="p-emp-cnpj">Aguarde...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="popup-ver-vaga">
+        <div class="popup-card">
+            <button class="close-popup" onclick="fecharModal('popup-ver-vaga')"><i data-lucide="x"></i></button>
+            <h2 id="v-vaga-titulo" style="color: var(--primary); margin-bottom: 5px; font-size: 22px;">Buscando Vaga...</h2>
+            <p style="color: var(--text-muted); font-size: 14px; margin-bottom: 25px;"><i data-lucide="map-pin" style="width: 14px;"></i> <span id="v-vaga-loc">Localização</span></p>
+            
+            <div class="perfil-section">
+                <h4><i data-lucide="dollar-sign" style="width: 16px;"></i> Remuneração</h4>
+                <p id="v-vaga-salario" style="font-weight: 600; color: var(--text-main);">Aguarde...</p>
+            </div>
+            <div class="perfil-section">
+                <h4><i data-lucide="briefcase" style="width: 16px;"></i> Contrato / Modalidade</h4>
+                <p id="v-vaga-modalidade">Aguarde...</p>
+            </div>
+            <div class="perfil-section">
+                <h4><i data-lucide="align-left" style="width: 16px;"></i> Descrição e Atribuições</h4>
+                <p id="v-vaga-desc">Aguarde...</p>
+            </div>
+            <div class="perfil-section" style="border-bottom: none;">
+                <h4><i data-lucide="zap" style="width: 16px;"></i> Habilidades Desejadas</h4>
+                <div id="v-vaga-hab" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-overlay" id="chat-panel">
+        <div class="chat-header">
+            <h3><i data-lucide="message-square" style="display:inline; width:18px; margin-right:8px;"></i> Suas Conversas</h3>
+            <i data-lucide="x" style="cursor: pointer;" onclick="toggleChatPanel()"></i>
+        </div>
+        
+        <div class="chat-list" id="chat-list-container">
+            <p style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px;">Nenhuma conversa iniciada.</p>
+        </div>
+
+        <div class="active-chat-area" id="active-chat-area">
+            <div class="chat-header" style="background: #fff; color: var(--text-main); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i data-lucide="arrow-left" style="cursor: pointer; color: var(--text-muted);" onclick="closeActiveChat()"></i>
+                    <h3 id="active-chat-name" style="font-size: 15px;">Nome</h3>
+                </div>
+            </div>
+            <div class="messages-box" id="messages-box"></div>
+            <div class="chat-input">
+                <input type="text" id="msg-input" placeholder="Digite sua mensagem...">
+                <button onclick="sendChatMessage()"><i data-lucide="send" style="width: 18px;"></i></button>
+            </div>
+        </div>
+    </div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, onSnapshot, serverTimestamp, addDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+        authDomain: "meuportaldevagas.firebaseapp.com",
+        projectId: "meuportaldevagas",
+        storageBucket: "meuportaldevagas.firebasestorage.app",
+        messagingSenderId: "77991933793",
+        appId: "1:77991933793:web:2e8df544915ce3dc463720"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUser = null;
+    let isLogged = false;
+    let currentActiveChatId = null;
+    let unsubscribeChat = null;
+    
+    let allVagasGlobal = []; 
+    let curriculoOriginal = {}; 
+    let docIdTrabalhador = null; 
+    window.habilidadesAtuais = []; 
+
+    // --- AUTENTICAÇÃO ---
+    onAuthStateChanged(auth, (user) => {
+        const logoutBtn = document.getElementById('logout-btn');
+        if (user) {
+            currentUser = user;
+            isLogged = true;
+            document.getElementById('user-name').innerText = `Bem-vindo de volta, ${user.displayName || 'Trabalhador'}`;
+            logoutBtn.style.display = 'flex';
+            
+            loadVagas();
+            listenToConversasNotificacoes();
+        } else {
+            isLogged = false;
+            document.getElementById('user-name').innerText = `Bem-vindo, Visitante`;
+            logoutBtn.style.display = 'none';
+            loadVagas(); 
+        }
+    });
+
+    window.toggleMobileMenu = () => { document.getElementById('sidebar').classList.toggle('open'); }
+    
+    window.switchTab = (tabName, element) => {
+        if(!isLogged && tabName !== 'vagas') {
+            alert("Faça login para acessar esta área.");
+            window.location.href = "escolha.html";
+            return;
+        }
+        document.getElementById('sidebar').classList.remove('open');
+        document.querySelectorAll('.menu a').forEach(a => a.classList.remove('active'));
+        if(element) element.classList.add('active');
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        document.getElementById(`sec-${tabName}`).classList.add('active');
+        document.getElementById('search-box').style.display = (tabName === 'vagas') ? 'flex' : 'none';
+
+        if(tabName === 'vagas') filterVagas();
+        if(tabName === 'candidaturas') loadCandidaturas();
+        if(tabName === 'curriculo') carregarCurriculoDadosCompleto();
+    }
+
+    window.openSupport = () => document.getElementById('support-modal').classList.add('active');
+    window.closeSupport = () => document.getElementById('support-modal').classList.remove('active');
+    window.fecharModal = (id) => document.getElementById(id).classList.remove('active');
+
+    // Funções Básicas de Vagas
+    async function loadVagas() {
+        const feed = document.getElementById('vagas-feed');
+        feed.innerHTML = "<p>Carregando vagas disponíveis...</p>";
+        try {
+            const q = query(collection(db, "vagas"), where("status", "==", "Ativa"));
+            const snapshot = await getDocs(q);
+            allVagasGlobal = [];
+            let cidadesSet = new Set(), cargosSet = new Set();
+            snapshot.forEach(docSnap => {
+                const vaga = { id: docSnap.id, ...docSnap.data() };
+                allVagasGlobal.push(vaga);
+                if(vaga.cidade) cidadesSet.add(vaga.cidade.trim());
+                if(vaga.titulo) cargosSet.add(vaga.titulo.trim());
+            });
+            document.getElementById('cidades-list').innerHTML = [...cidadesSet].map(c => `<option value="${c}">`).join('');
+            document.getElementById('cargos-list').innerHTML = [...cargosSet].map(c => `<option value="${c}">`).join('');
+            renderVagas(allVagasGlobal);
+        } catch(e) { console.error(e); }
+    }
+
+    window.filterVagas = () => {
+        const queryCargo = document.getElementById('search-cargo').value.toLowerCase();
+        const queryCidade = document.getElementById('search-cidade').value.toLowerCase();
+        const filtradas = allVagasGlobal.filter(v => v.titulo.toLowerCase().includes(queryCargo) && v.cidade.toLowerCase().includes(queryCidade));
+        renderVagas(filtradas);
+    }
+
+    function renderVagas(lista) {
+        const feed = document.getElementById('vagas-feed');
+        feed.innerHTML = "";
+        if (lista.length === 0) {
+            feed.innerHTML = `<div style="text-align:center; padding: 40px; background:#fff; border-radius:12px; border:1px dashed #ccc;"><i data-lucide="search-x" style="width:40px; height:40px; color:#94a3b8; margin-bottom:10px;"></i><h3 style="color:#64748b;">Não possui vaga cadastrada conforme o selecionado</h3></div>`;
+            lucide.createIcons(); return;
+        }
+        lista.forEach(vaga => {
+            const card = document.createElement('div'); card.className = 'vaga-card';
+            card.innerHTML = `<div><h3 style="color: var(--text-main); font-size: 18px; margin-bottom: 5px;">${vaga.titulo}</h3><p style="color: var(--text-muted); font-size: 14px; margin-bottom: 8px;">${vaga.nome_empresa} • ${vaga.cidade}/${vaga.estado} • ${vaga.modalidade || 'Presencial'}</p><strong style="color: var(--primary); font-size: 15px;">${vaga.salario || 'A Combinar'}</strong></div><button class="btn-candidatar auth-required" onclick="candidatarVaga('${vaga.id}', '${vaga.id_empresa}', '${vaga.nome_empresa}', '${vaga.titulo}')"><i data-lucide="check-circle" style="width: 18px;"></i> Candidatar-se</button>`;
+            feed.appendChild(card);
+        });
+        lucide.createIcons();
+    }
+
+    // Fecha a barra lateral automaticamente ao clicar fora dela
+document.addEventListener('click', (event) => {
+    const sidebar = document.getElementById('sidebar');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    
+    // Se a barra estiver aberta e o clique NÃO foi dentro da barra nem no botão de abrir
+    if (sidebar.classList.contains('open') && 
+        !sidebar.contains(event.target) && 
+        !mobileMenuBtn.contains(event.target)) {
+        
+        sidebar.classList.remove('open');
+    }
+});
+
+    // --- NOVA TELA DE CANDIDATURAS ---
+    async function loadCandidaturas() {
+        const feed = document.getElementById('candidaturas-feed');
+        feed.innerHTML = "<p>Buscando candidaturas...</p>";
+        try {
+            const q = query(collection(db, "candidaturas"), where("id_trabalhador", "==", currentUser.uid));
+            const snapshot = await getDocs(q);
+            if(snapshot.empty) { feed.innerHTML = "<p>Você ainda não se candidatou a nenhuma vaga.</p>"; return; }
+            feed.innerHTML = "";
+            snapshot.forEach(docSnap => {
+                const cand = docSnap.data();
+                const dataFormatada = cand.data_candidatura ? new Date(cand.data_candidatura.toDate()).toLocaleDateString('pt-BR') : 'Recente';
+                
+                feed.innerHTML += `
+                <div class="candidatura-card" style="flex-direction: column; align-items: flex-start; gap: 15px;">
+                    <div style="width: 100%; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h3 style="font-size:18px; color: var(--text-main); margin-bottom: 5px;">${cand.titulo_vaga}</h3>
+                            <p style="font-size:14px; color:var(--text-muted);">Empresa: <strong>${cand.nome_empresa || cand.id_empresa}</strong> • Cadastrada em: ${dataFormatada}</p>
+                        </div>
+                        <span style="background:var(--primary-light); color:var(--primary); padding:6px 12px; border-radius:8px; font-size:12px; font-weight:bold;">Candidatura Registrada</span>
+                    </div>
+                    
+                    <div style="width: 100%; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                        <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; font-size: 13px;" onclick="verDetalhesVaga('${cand.id_vaga}')">
+                            <i data-lucide="eye" style="width: 16px;"></i> Ver Vaga
+                        </button>
+                        <button class="btn-action" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; font-size: 13px;" onclick="verPerfilEmpresa('${cand.id_empresa}')">
+                            <i data-lucide="building" style="width: 16px;"></i> Perfil da Empresa
+                        </button>
+                        <button class="btn-action" style="padding: 8px 16px; font-size: 13px;" onclick="abrirChatDireto('${cand.id_empresa}', '${cand.nome_empresa || 'Empresa'}', '${cand.titulo_vaga}')">
+                            <i data-lucide="message-circle" style="width: 16px;"></i> Abrir Chat
+                        </button>
+                    </div>
+                </div>`;
+            });
+            lucide.createIcons();
+        } catch(e) { console.error(e); }
+    }
+
+    // --- VISUALIZAR EMPRESA E VAGA ---
+    window.verPerfilEmpresa = async function(uidEmpresa) {
+        document.getElementById('popup-perfil-empresa').classList.add('active');
+        document.getElementById('p-emp-nome').innerText = "Buscando...";
+        try {
+            const q = query(collection(db, "Empresas"), where("uid", "==", uidEmpresa));
+            const snap = await getDocs(q);
+            if(!snap.empty) {
+                const emp = snap.docs[0].data();
+                document.getElementById('p-emp-nome').innerText = emp.nome || emp.razaoSocial || "Empresa";
+                document.getElementById('p-emp-cnpj').innerText = emp.cnpj || "Não informado";
+                document.getElementById('p-emp-email').innerText = emp.email || "Não informado";
+                document.getElementById('p-emp-loc').innerText = (emp.cidade || emp.estado || emp.cep) ? `${emp.estado || ''} - CEP: ${emp.cep || ''}` : "Não informado";
+                document.getElementById('p-emp-seg').innerText = emp.segmento || "Não informado";
+                document.getElementById('p-emp-sobre').innerText = emp.sobre || "Sem descrição disponível.";
+                lucide.createIcons();
+            } else {
+                document.getElementById('p-emp-nome').innerText = "Empresa não encontrada ou perfil privado.";
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    window.verDetalhesVaga = async function(idVaga) {
+        document.getElementById('popup-ver-vaga').classList.add('active');
+        document.getElementById('v-vaga-titulo').innerText = "Buscando...";
+        try {
+            const docSnap = await getDoc(doc(db, "vagas", idVaga));
+            if(docSnap.exists()) {
+                const v = docSnap.data();
+                document.getElementById('v-vaga-titulo').innerText = v.titulo || "Vaga";
+                document.getElementById('v-vaga-salario').innerText = v.salario || "A combinar";
+                document.getElementById('v-vaga-modalidade').innerText = `${v.tipo} - ${v.modalidade}`;
+                document.getElementById('v-vaga-loc').innerText = `${v.cidade}/${v.estado}`;
+                document.getElementById('v-vaga-desc').innerText = v.descricao || "Sem descrição.";
+                
+                const habContainer = document.getElementById('v-vaga-hab');
+                if (v.habilidades && v.habilidades.length > 0) {
+                    habContainer.innerHTML = v.habilidades.map(h => `<span class="skill-tag">${h}</span>`).join('');
+                } else {
+                    habContainer.innerHTML = "<span style='font-size:13px;color:var(--text-muted);'>Nenhuma habilidade específica informada.</span>";
+                }
+                lucide.createIcons();
+            } else {
+                document.getElementById('v-vaga-titulo').innerText = "Vaga indisponível ou removida pela empresa";
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    window.abrirChatDireto = async function(idEmpresa, nomeEmpresa, tituloVaga) {
+        toggleChatPanel();
+        const q = query(collection(db, "conversas"), 
+            where("id_trabalhador", "==", currentUser.uid),
+            where("id_empresa", "==", idEmpresa),
+            where("titulo_vaga", "==", tituloVaga)
+        );
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+            openChatRoom(snap.docs[0].id, nomeEmpresa);
+        } else {
+            alert("Ainda não há canal de conversa para esta candidatura.");
+        }
+    }
+
+
+    // --- CURRÍCULO E REAUTENTICAÇÃO (MANTIDOS E ATUALIZADOS) ---
+    window.addFormacaoCV = (data = {}) => {
+        const html = `<div class="dynamic-item formacao-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x"></i></button><div class="form-grid-cv"><div class="form-group"><label>Nível de Ensino</label><select class="f-nivel"><option value="" disabled ${!data.nivel ? 'selected':''}>Selecione...</option><option ${data.nivel==='Ensino Fundamental'?'selected':''}>Ensino Fundamental</option><option ${data.nivel==='Ensino Médio'?'selected':''}>Ensino Médio</option><option ${data.nivel==='Ensino Técnico'?'selected':''}>Ensino Técnico</option><option ${data.nivel==='Ensino Superior (Graduação)'?'selected':''}>Ensino Superior (Graduação)</option><option ${data.nivel==='Pós-Graduação (Especialização)'?'selected':''}>Pós-Graduação (Especialização)</option></select></div><div class="form-group"><label>Curso</label><input type="text" class="f-curso" value="${data.curso||''}"></div><div class="form-group"><label>Instituição</label><input type="text" class="f-inst" value="${data.inst||''}"></div><div class="form-group"><label>Status</label><select class="f-status"><option ${data.status==='Concluído'?'selected':''}>Concluído</option><option ${data.status==='Cursando'?'selected':''}>Cursando</option></select></div><div class="form-group"><label>Início</label><input type="date" class="f-ini" value="${data.inicio||''}"></div><div class="form-group"><label>Fim</label><input type="date" class="f-fim" value="${data.fim||''}"></div></div></div>`;
+        document.getElementById('curFormacaoContainer').insertAdjacentHTML('beforeend', html);
+        lucide.createIcons();
+    }
+    window.addExperienciaCV = (data = {}) => {
+        const html = `<div class="dynamic-item exp-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x"></i></button><div class="form-grid-cv"><div class="form-group"><label>Cargo</label><input type="text" class="e-cargo" value="${data.cargo||''}"></div><div class="form-group"><label>Empresa</label><input type="text" class="e-emp" value="${data.empresa||''}"></div><div class="form-group"><label>Início</label><input type="date" class="e-ini" value="${data.inicio||''}"></div><div class="form-group"><label>Término</label><input type="date" class="e-fim" value="${data.fim||''}"></div><div class="form-group full-width"><label>Atividades</label><textarea class="e-desc" rows="2">${data.desc||''}</textarea></div></div></div>`;
+        document.getElementById('curExperienciaContainer').insertAdjacentHTML('beforeend', html);
+        lucide.createIcons();
+    }
+    window.addCertificadoCV = (data = {}) => {
+        const html = `<div class="dynamic-item cert-item"><button type="button" class="btn-remove" onclick="this.parentElement.remove()"><i data-lucide="x"></i></button><div class="form-grid-cv"><div class="form-group full-width"><label>Certificado</label><input type="text" class="c-nome" value="${data.nome||''}"></div><div class="form-group"><label>Instituição</label><input type="text" class="c-inst" value="${data.inst||''}"></div><div class="form-group"><label>Data</label><input type="date" class="c-data" value="${data.data||''}"></div></div></div>`;
+        document.getElementById('curCertificadoContainer').insertAdjacentHTML('beforeend', html);
+        lucide.createIcons();
+    }
+    window.renderSkillsCV = () => {
+        const list = document.getElementById('skillsListCV');
+        list.innerHTML = window.habilidadesAtuais.map((s, i) => `<div class="skill-tag">${s} <span onclick="removeSkillCV(${i})"><i data-lucide="x" style="width:14px;"></i></span></div>`).join('');
+        lucide.createIcons();
+    }
+    window.addSkillManualCV = () => {
+        const input = document.getElementById('skillInputCV');
+        const val = input.value.trim();
+        if (val && !window.habilidadesAtuais.includes(val)) { window.habilidadesAtuais.push(val); renderSkillsCV(); }
+        input.value = "";
+    }
+    window.removeSkillCV = (i) => { window.habilidadesAtuais.splice(i, 1); renderSkillsCV(); }
+
+    async function carregarCurriculoDadosCompleto() {
+        try {
+            const q = query(collection(db, "Trabalhadores"), where("uid", "==", currentUser.uid));
+            const snap = await getDocs(q);
+            if (!snap.empty) {
+                const docSnap = snap.docs[0];
+                curriculoOriginal = docSnap.data();
+                docIdTrabalhador = docSnap.id;
+
+                const dp = curriculoOriginal.dados_pessoais || {};
+                
+                document.getElementById('cur-nome').value = dp.nome || curriculoOriginal.nome || currentUser.displayName || "";
+                document.getElementById('cur-email').value = dp.email || currentUser.email || "";
+                document.getElementById('cur-telefone').value = dp.telefone || "";
+                document.getElementById('cur-cep').value = dp.cep || "";
+                document.getElementById('cur-cidade').value = dp.cidade_estado || curriculoOriginal.cidade || "";
+                document.getElementById('cur-endereco').value = dp.endereco || "";
+                document.getElementById('cur-nac').value = dp.nacionalidade || "";
+                document.getElementById('cur-links').value = dp.linkedin || "";
+                document.getElementById('cur-objetivo').value = curriculoOriginal.objetivo || curriculoOriginal.resumo || "";
+
+                document.getElementById('curFormacaoContainer').innerHTML = "";
+                document.getElementById('curExperienciaContainer').innerHTML = "";
+                document.getElementById('curCertificadoContainer').innerHTML = "";
+                window.habilidadesAtuais = [];
+
+                if(Array.isArray(curriculoOriginal.formacoes)) curriculoOriginal.formacoes.forEach(f => addFormacaoCV(f));
+                if(Array.isArray(curriculoOriginal.experiencias)) curriculoOriginal.experiencias.forEach(e => addExperienciaCV(e));
+                if(Array.isArray(curriculoOriginal.certificados)) curriculoOriginal.certificados.forEach(c => addCertificadoCV(c));
+                if(Array.isArray(curriculoOriginal.habilidades)) window.habilidadesAtuais = [...curriculoOriginal.habilidades];
+                else if(typeof curriculoOriginal.habilidades === 'string') window.habilidadesAtuais = [curriculoOriginal.habilidades];
+                renderSkillsCV();
+
+            } else {
+                curriculoOriginal = {};
+                document.getElementById('cur-nome').value = currentUser.displayName || "";
+                document.getElementById('cur-email').value = currentUser.email || "";
+            }
+        } catch(e) { console.error("Erro ao carregar currículo", e); }
+    }
+
+    window.saveCurriculoCompleto = async () => {
+        const btn = document.getElementById('btnSalvarCV');
+        btn.innerHTML = 'Salvando... <i data-lucide="loader"></i>';
+        
+        const novoEmail = document.getElementById('cur-email').value.trim();
+        const novaSenha = document.getElementById('cur-senha').value;
+        const novoNome = document.getElementById('cur-nome').value.trim();
+
+        // ATUALIZAÇÃO SEGURA E VERIFICADA DO LOGIN (Se aplicável)
+        if (novoEmail !== currentUser.email || (novaSenha && novaSenha.length >= 6)) {
+            const senhaAtual = prompt("MEDIDA DE SEGURANÇA:\nPara alterar seu e-mail ou senha, digite sua SENHA ATUAL:");
+            
+            if (senhaAtual) {
+                try {
+                    const credential = EmailAuthProvider.credential(currentUser.email, senhaAtual);
+                    await reauthenticateWithCredential(currentUser, credential);
+                    
+                    if(novoEmail !== currentUser.email) {
+                        await verifyBeforeUpdateEmail(currentUser, novoEmail);
+                        alert("Foi enviado um link de verificação para o seu NOVO e-mail. Acesse sua caixa de entrada para confirmar a troca.");
+                    }
+                    if(novaSenha && novaSenha.length >= 6) {
+                        await updatePassword(currentUser, novaSenha);
+                        alert("Senha de login atualizada com sucesso!");
+                        document.getElementById('cur-senha').value = ""; 
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert("A senha atual está incorreta. A alteração de login foi cancelada.");
+                    btn.innerHTML = 'Tentar Novamente';
+                    return; 
+                }
+            } else {
+                alert("Alteração de login cancelada. O restante do perfil será salvo.");
+            }
+        }
+
+        const formacoes = Array.from(document.querySelectorAll('.formacao-item')).map(item => ({
+            nivel: item.querySelector('.f-nivel').value, curso: item.querySelector('.f-curso').value,
+            inst: item.querySelector('.f-inst').value, status: item.querySelector('.f-status').value,
+            inicio: item.querySelector('.f-ini').value, fim: item.querySelector('.f-fim').value
+        }));
+        const experiencias = Array.from(document.querySelectorAll('.exp-item')).map(item => ({
+            cargo: item.querySelector('.e-cargo').value, empresa: item.querySelector('.e-emp').value,
+            inicio: item.querySelector('.e-ini').value, fim: item.querySelector('.e-fim').value,
+            desc: item.querySelector('.e-desc').value
+        }));
+        const certificados = Array.from(document.querySelectorAll('.cert-item')).map(item => ({
+            nome: item.querySelector('.c-nome').value, inst: item.querySelector('.c-inst').value,
+            data: item.querySelector('.c-data').value
+        }));
+
+        const objDados = {
+            uid: currentUser.uid,
+            tipo: "trabalhador",
+            dados_pessoais: {
+                nome: novoNome, email: novoEmail, telefone: document.getElementById('cur-telefone').value,
+                cep: document.getElementById('cur-cep').value, cidade_estado: document.getElementById('cur-cidade').value,
+                endereco: document.getElementById('cur-endereco').value, nacionalidade: document.getElementById('cur-nac').value,
+                linkedin: document.getElementById('cur-links').value
+            },
+            objetivo: document.getElementById('cur-objetivo').value,
+            habilidades: window.habilidadesAtuais, formacoes: formacoes, experiencias: experiencias,
+            certificados: certificados, data_ultima_atualizacao: serverTimestamp()
+        };
+
+        try {
+            const targetDocId = docIdTrabalhador || novoNome || currentUser.uid;
+            await setDoc(doc(db, "Trabalhadores", targetDocId), objDados, { merge: true });
+
+            const alteracoes = {};
+            let teveMudanca = false;
+
+            const dpOld = curriculoOriginal.dados_pessoais || {};
+            const keysToCheck = ['nome', 'email', 'telefone', 'cep', 'cidade_estado', 'endereco', 'nacionalidade', 'linkedin'];
+            keysToCheck.forEach(k => {
+                if(objDados.dados_pessoais[k] !== (dpOld[k] || "")) { alteracoes[k] = { de: dpOld[k] || "vazio", para: objDados.dados_pessoais[k] }; teveMudanca = true; }
+            });
+            if(objDados.objetivo !== (curriculoOriginal.objetivo || "")) { alteracoes.objetivo = { de: curriculoOriginal.objetivo || "vazio", para: objDados.objetivo }; teveMudanca = true; }
+            if(JSON.stringify(objDados.habilidades) !== JSON.stringify(curriculoOriginal.habilidades || [])) { alteracoes.habilidades = { status: "Lista Modificada" }; teveMudanca = true; }
+            if(JSON.stringify(objDados.formacoes) !== JSON.stringify(curriculoOriginal.formacoes || [])) { alteracoes.formacoes = { status: "Lista Modificada" }; teveMudanca = true; }
+            if(JSON.stringify(objDados.experiencias) !== JSON.stringify(curriculoOriginal.experiencias || [])) { alteracoes.experiencias = { status: "Lista Modificada" }; teveMudanca = true; }
+            if(JSON.stringify(objDados.certificados) !== JSON.stringify(curriculoOriginal.certificados || [])) { alteracoes.certificados = { status: "Lista Modificada" }; teveMudanca = true; }
+
+            if(teveMudanca) {
+                await addDoc(collection(db, "edicoes_de_perfil_feitas_por_trabalhadores"), {
+                    id_trabalhador: currentUser.uid, nome_trabalhador: novoNome,
+                    alteracoes_realizadas: alteracoes, data_alteracao: serverTimestamp()
+                });
+                curriculoOriginal = JSON.parse(JSON.stringify(objDados));
+            }
+
+            btn.innerHTML = '<i data-lucide="check"></i> Perfil Atualizado!';
+            lucide.createIcons();
+            setTimeout(() => { btn.innerHTML = '<i data-lucide="save"></i> Salvar e Atualizar Meu Perfil'; lucide.createIcons(); }, 3000);
+
+        } catch(e) {
+            console.error(e); alert("Erro ao atualizar banco de dados.");
+            btn.innerHTML = 'Tentar Novamente';
+        }
+    }
+
+    // --- LÓGICA DE CHAT E NOTIFICAÇÕES (CORRIGIDA) ---
+    window.candidatarVaga = async function(idVaga, idEmpresa, nomeEmpresa, tituloVaga) {
+        if (!isLogged) return;
+        try {
+            const nomeTrabalhador = currentUser.displayName || currentUser.email.split('@')[0];
+            const idCandidatura = `${nomeTrabalhador} - ${tituloVaga}`;
+            await setDoc(doc(db, "candidaturas", idCandidatura), { id_trabalhador: currentUser.uid, nome_trabalhador: nomeTrabalhador, id_vaga: idVaga, id_empresa: idEmpresa, nome_empresa: nomeEmpresa, titulo_vaga: tituloVaga, data_candidatura: serverTimestamp() });
+            const empresaClean = nomeEmpresa.replace(/[^a-zA-Z0-9]/g, '');
+            const trabClean = nomeTrabalhador.replace(/[^a-zA-Z0-9]/g, '');
+            const idConversaLimpo = `Empresa_${empresaClean}_Trab_${trabClean}_Vaga${idVaga.substring(0,4)}`;
+            await setDoc(doc(db, "conversas", idConversaLimpo), { id_conversa: idConversaLimpo, id_empresa: idEmpresa, id_trabalhador: currentUser.uid, nome_empresa: nomeEmpresa, nome_trabalhador: nomeTrabalhador, titulo_vaga: tituloVaga, atualizado_em: serverTimestamp() }, { merge: true });
+            await addDoc(collection(db, "conversas", idConversaLimpo, "mensagens"), { remetente: "trabalhador", texto: `Olá! Acabei de me candidatar para a vaga de ${tituloVaga}.`, timestamp: serverTimestamp() });
+            alert("Candidatura enviada com sucesso!");
+            toggleChatPanel(); 
+        } catch(e) { console.error("Erro:", e); }
+    }
+
+    window.toggleChatPanel = function() { 
+        if(!isLogged) { alert("Faça login para acessar o chat."); return; } 
+        document.getElementById('chat-panel').classList.toggle('open'); 
+        
+        // CORREÇÃO: Limpa as notificações de bolinha vermelha assim que visualiza
+        document.getElementById('chat-badge').classList.remove('active');
+        document.getElementById('noti-badge').classList.remove('active');
+    }
+
+    function listenToConversasNotificacoes() {
+        const q = query(collection(db, "conversas"), where("id_trabalhador", "==", currentUser.uid));
+        onSnapshot(q, (snapshot) => {
+            const container = document.getElementById('chat-list-container');
+            let chats = []; 
+            let temMensagemNova = false;
+
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "modified") temMensagemNova = true; // Se a conversa modificou, aciona o alerta
+            });
+
+            // Se for novo alerta e o painel estiver fechado, mostra a bolinha vermelha
+            if (temMensagemNova && !document.getElementById('chat-panel').classList.contains('open')) {
+                document.getElementById('chat-badge').classList.add('active');
+                document.getElementById('noti-badge').classList.add('active');
+            }
+
+            snapshot.forEach(docSnap => chats.push({ id: docSnap.id, ...docSnap.data() }));
+            container.innerHTML = "";
+            if (chats.length === 0) { container.innerHTML = `<p style="padding: 20px; text-align:center;">Nenhuma conversa.</p>`; return; }
+            
+            chats.forEach(chat => {
+                const div = document.createElement('div'); div.className = "chat-item";
+                div.innerHTML = `<div class="chat-info" onclick="openChatRoom('${chat.id}', '${chat.nome_empresa}')" style="flex:1;"><h4 style="font-size:14px; margin-bottom:4px;">${chat.nome_empresa}</h4><p style="font-size:12px; color:var(--text-muted);">Vaga: ${chat.titulo_vaga}</p></div>`;
+                container.appendChild(div);
+            });
+        });
+    }
+
+    window.openChatRoom = function(chatId, nomeEmpresa) {
+        currentActiveChatId = chatId; document.getElementById('active-chat-name').innerText = nomeEmpresa; document.getElementById('active-chat-area').classList.add('visible');
+        if (unsubscribeChat) unsubscribeChat();
+        
+        document.getElementById('chat-badge').classList.remove('active');
+        document.getElementById('noti-badge').classList.remove('active');
+
+        const msgQuery = query(collection(db, "conversas", chatId, "mensagens"), orderBy("timestamp", "asc"));
+        unsubscribeChat = onSnapshot(msgQuery, (snapshot) => {
+            const box = document.getElementById('messages-box'); box.innerHTML = "";
+            snapshot.forEach(docSnap => { const msg = docSnap.data(); const div = document.createElement('div'); div.className = `msg-bubble ${msg.remetente === 'trabalhador' ? 'msg-trabalhador' : 'msg-empresa'}`; div.innerText = msg.texto; box.appendChild(div); });
+            box.scrollTop = box.scrollHeight;
+        });
+    }
+    window.closeActiveChat = function() { document.getElementById('active-chat-area').classList.remove('visible'); if (unsubscribeChat) unsubscribeChat(); currentActiveChatId = null; }
+    window.sendChatMessage = async function() {
+        const input = document.getElementById('msg-input'); const text = input.value.trim(); if (!text || !currentActiveChatId) return;
+        try { await addDoc(collection(db, "conversas", currentActiveChatId, "mensagens"), { remetente: "trabalhador", texto: text, timestamp: serverTimestamp() }); input.value = ""; } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', (e) => { e.preventDefault(); signOut(auth).then(() => window.location.replace("escolha.html")); });
+    lucide.createIcons();
+</script>
+</body>
+</html>

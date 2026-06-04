@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escolha seu Perfil | Vagas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #235067, #061f6e);
+            --card-bg: rgba(18, 18, 18, 0.95);
+            --blue-action: #f19c2e;
+            --orange-action: #2855db5c;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--primary-gradient);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Efeito de círculo decorativo no fundo para dar profundidade */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            top: 10%;
+            left: 10%;
+            z-index: 0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            margin-bottom: 35px;
+            font-size: 0.95rem;
+        }
+
+        /* ESTILIZAÇÃO REMODELADA DOS BOTÕES DE ESCOLA */
+        .btn-choice {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            color: white;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de iluminação reflexiva (Shimmer Effect) */
+        .btn-choice::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.15), transparent);
+            transform: skewX(-25deg);
+            transition: 0.75s;
+        }
+
+        /* Seta dinâmica indicativa que surge no hover */
+        .btn-choice::after {
+            content: '➔';
+            position: absolute;
+            right: 24px;
+            font-size: 1.2rem;
+            color: white;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-choice:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-choice:hover::before {
+            left: 150%;
+        }
+
+        .btn-choice:hover::after {
+            opacity: 0.9;
+            transform: translateX(0);
+        }
+
+        /* Cores com gradientes volumétricos e harmônicos */
+        .btn-trabalhador { 
+            background: linear-gradient(135deg, #f19c2e, #d47a0c); 
+        }
+        .btn-empresa { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+        }
+
+        /* Ajuste do box de ícones para acompanhar o design premium */
+        .icon-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 12px;
+            border-radius: 12px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .btn-choice:hover .icon-box {
+            transform: scale(1.1) rotate(-4deg);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ESTILIZAÇÃO DO BOTÃO VOLTAR AO LOGIN ANIMAÇÃO PREMIUM */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 30px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            position: relative;
+            padding-bottom: 4px;
+        }
+
+        /* Linha decorativa oculta que expande no hover */
+        .back-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background-color: #f19c2e;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        /* Transição suave do ícone da seta */
+        .back-link i {
+            transition: transform 0.3s ease;
+        }
+
+        /* Efeito de passar o cursor (Hover) */
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        /* Ativação da linha expandida */
+        .back-link:hover::after {
+            width: 100%;
+        }
+
+        /* Faz a seta mover-se indicando o caminho de volta */
+        .back-link:hover i {
+            transform: translateX(-5px);
+            color: #f19c2e;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 40px 25px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Bem-vindo!</h2>
+    <p class="subtitle">Como você deseja utilizar o portal?</p>
+
+    <a href="trabalhadores.html" class="btn-choice btn-trabalhador">
+        <div class="icon-box">
+            <i data-lucide="user"></i>
+        </div>
+        <div class="text-content">
+            <b>Sou Trabalhador</b>
+            <span>Procuro uma oportunidade</span>
+        </div>
+    </a>
+
+    <a href="cadastro-empresa.html" class="btn-choice btn-empresa">
+        <div class="icon-box">
+            <i data-lucide="building-2"></i>
+        </div>
+        <div class="text-content">
+            <b>Sou Empresa</b>
+            <span>Quero anunciar vagas</span>
+        </div>
+    </a>
+
+    <a href="login.html" class="back-link">
+        <i data-lucide="arrow-left" style="width:16px"></i> Voltar ao Login
+    </a>
+</div>
+
+<script>
+    // Inicia os ícones do Lucide
+    lucide.createIcons();
+</script>
+
+</body>
+</html>

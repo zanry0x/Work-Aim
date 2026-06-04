@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Administrador Pro | Portal de Vagas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #111827;
+            --bg-sidebar: #0f172a;
+            --accent-primary: #3b82f6;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --border-color: #1f2937;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* HEADER MOBILE - Elemento para ecrãs pequenos */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 60px;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 1001;
+        }
+
+        .mobile-toggle {
+            background: none; border: none;
+            color: var(--text-main); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Cortina de fundo para fechar o menu ao tocar fora no telemóvel */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 999;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh; left: 0; top: 0; z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex-grow: 1;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            background-color: #1e293b;
+            color: var(--text-main);
+        }
+
+        .sidebar-link.active {
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-logout {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: var(--accent-danger);
+            color: white;
+        }
+
+        /* Main Content Container */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex-grow: 1;
+            padding: 40px;
+            width: calc(100% - var(--sidebar-width));
+            transition: padding 0.3s ease, margin 0.3s ease;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            gap: 16px;
+        }
+
+        .date-filter-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-card);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .date-filter-box input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Stats Card Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 16px; top: 16px;
+            padding: 8px;
+            border-radius: 8px;
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+        }
+
+        .stat-card.success .stat-icon { background-color: rgba(16, 185, 129, 0.1); color: var(--accent-success); }
+        .stat-card.warning .stat-icon { background-color: rgba(245, 158, 11, 0.1); color: var(--accent-warning); }
+        .stat-card.danger .stat-icon { background-color: rgba(239, 68, 68, 0.1); color: var(--accent-danger); }
+
+        .stat-value { font-size: 2rem; font-weight: 700; margin-top: 8px; }
+        .stat-label { color: var(--text-muted); font-size: 0.875rem; font-weight: 500; }
+        .stat-sub { font-size: 0.75rem; margin-top: 4px; color: var(--accent-primary); }
+
+        /* Chart Canvas Layout */
+        .chart-container {
+            background-color: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 40px;
+        }
+
+        /* Dynamic View Switching */
+        .view-section { display: none; }
+        .view-section.active { display: block; }
+
+        /* Custom Table Design com Scroll Responsivo */
+        .table-wrapper {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%; border-collapse: collapse; text-align: left;
+        }
+
+        th {
+            background-color: #1f2937;
+            padding: 16px; color: var(--text-main);
+            font-size: 0.85rem; font-weight: 600; text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 16px; border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem; vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        .action-btns {
+            display: flex; gap: 8px; justify-content: center;
+        }
+
+        .btn-action {
+            padding: 8px; border: none; border-radius: 6px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
+
+        .btn-view { background-color: rgba(59, 130, 246, 0.2); color: var(--accent-primary); }
+        .btn-view:hover { background-color: var(--accent-primary); color: white; }
+        .btn-delete { background-color: rgba(239, 68, 68, 0.2); color: var(--accent-danger); }
+        .btn-delete:hover { background-color: var(--accent-danger); color: white; }
+
+        .empty-msg { text-align: center; padding: 40px; color: var(--text-muted); }
+
+        /* Modal Details View */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center;
+            padding: 16px;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 24px; border-radius: 16px; width: 100%; max-width: 550px;
+            position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            max-height: 90vh; overflow-y: auto;
+        }
+        .modal-close {
+            position: absolute; right: 20px; top: 20px; background: transparent;
+            border: none; color: var(--text-muted); cursor: pointer;
+        }
+        .modal-close:hover { color: white; }
+        .modal-title { font-size: 1.3rem; margin-bottom: 20px; color: var(--accent-primary); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; padding-right: 24px; }
+        .detail-item { margin-bottom: 12px; font-size: 0.95rem; display: flex; flex-direction: column; gap: 4px; }
+        .detail-label { font-weight: 600; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; }
+        .detail-value { background-color: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 6px; border: 1px solid #1f2937; word-break: break-all; }
+
+        .pass-box {
+            background-color: rgba(245, 158, 11, 0.1); border: 1px dashed var(--accent-warning);
+            padding: 12px; border-radius: 8px; color: var(--accent-warning); font-size: 0.85rem; margin-top: 15px;
+        }
+
+        .btn-reset-pass {
+            margin-top: 10px; width: 100%; background: var(--accent-warning); color: #000;
+            font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .btn-reset-pass:hover { opacity: 0.9; }
+
+        /* Provision Form Design */
+        .provision-form {
+            background-color: var(--bg-card); border: 1px solid var(--border-color);
+            padding: 30px; border-radius: 12px; max-width: 500px; margin: 0 auto;
+        }
+        .form-group { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 0.9rem; font-weight: 500; }
+        .form-group input, .form-group select {
+            background-color: #1f2937; border: 1px solid var(--border-color);
+            padding: 12px; border-radius: 8px; color: white; outline: none;
+        }
+        .btn-submit {
+            background-color: var(--accent-primary); color: white; font-weight: 600;
+            padding: 14px; border: none; border-radius: 8px; cursor: pointer; width: 100%; transition: 0.2s;
+        }
+        .btn-submit:hover { opacity: 0.9; }
+
+        /* REGRAS DE RESPONSIVIDADE PARA TELEMÓVEL */
+        @media (max-width: 768px) {
+            .mobile-header {
+                display: flex;
+            }
+            .sidebar {
+                transform: translateX(-100%);
+                top: 60px;
+                height: calc(100vh - 60px);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .sidebar-overlay.open {
+                display: block;
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 84px 16px 40px 16px;
+            }
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .date-filter-box {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 1.1rem; font-weight: 700; color: var(--accent-primary);">
+            <i data-lucide="shield-check"></i>
+            <span>Painel Admin</span>
+        </div>
+        <button class="mobile-toggle" onclick="toggleSidebar()">
+            <i data-lucide="menu" id="menu-icon"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i data-lucide="shield-check"></i>
+            <span>Painel Admin</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a class="sidebar-link active" onclick="switchView('overview', this); closeSidebarOnMobile();"><i data-lucide="layout-dashboard"></i> Dashboard</a></li>
+            <li><a class="sidebar-link" onclick="switchView('trabalhadores', this); closeSidebarOnMobile();"><i data-lucide="users"></i> Candidatos</a></li>
+            <li><a class="sidebar-link" onclick="switchView('empresas', this); closeSidebarOnMobile();"><i data-lucide="building-2"></i> Empresas</a></li>
+            <li><a class="sidebar-link" onclick="switchView('vagas', this); closeSidebarOnMobile();"><i data-lucide="briefcase"></i> Vagas Publicadas</a></li>
+            <li><a class="sidebar-link" onclick="switchView('provisionamento', this); closeSidebarOnMobile();"><i data-lucide="user-plus"></i> Provisionamento</a></li>
+        </ul>
+        <div class="sidebar-footer">
+            <button class="btn-logout" id="admin-logout"><i data-lucide="log-out"></i> Sair do Painel</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        
+        <div class="page-header">
+            <div>
+                <h1 id="view-title">Dashboard Global</h1>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 4px;">Monitoramento em tempo real do ecossistema.</p>
+            </div>
+            <div class="date-filter-box">
+                <i data-lucide="calendar" style="color: var(--accent-primary); width:18px;"></i>
+                <label style="font-size:12px; color:var(--text-muted);">Filtrar por Mês/Ano:</label>
+                <input type="month" id="admin-month-filter">
+            </div>
+        </div>
+
+        <div id="view-overview" class="view-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i data-lucide="users"></i></div>
+                    <div class="stat-label">Total Candidatos</div>
+                    <div class="stat-value" id="val-total-trabalhadores">0</div>
+                    <div class="stat-sub" id="sub-trabalhadores">Carregando...</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-icon"><i data-lucide="building-2"></i></div>
+                    <div class="stat-label">Total Empresas</div>
+                    <div class="stat-value" id="val-total-empresas">0</div>
+                    <div class="stat-sub" id="sub-empresas">Carregando...</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-icon"><i data-lucide="briefcase"></i></div>
+                    <div class="stat-label">Vagas Publicadas</div>
+                    <div class="stat-value" id="val-total-vagas">0</div>
+                    <div class="stat-sub" id="sub-vagas">Carregando...</div>
+                </div>
+                <div class="stat-card danger">
+                    <div class="stat-icon"><i data-lucide="file-check-2"></i></div>
+                    <div class="stat-label">Candidaturas Feitas</div>
+                    <div class="stat-value" id="val-total-candidaturas">0</div>
+                    <div class="stat-sub" id="sub-candidaturas">Carregando...</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3 style="margin-bottom: 20px; font-size: 1.1rem; font-weight: 600;">Métricas de Distribuição e Atividade</h3>
+                <canvas id="adminChart" style="max-height: 350px; width: 100%;"></canvas>
+            </div>
+        </div>
+
+        <div id="view-trabalhadores" class="view-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome Completo</th>
+                            <th>E-mail</th>
+                            <th>Celular / WhatsApp</th>
+                            <th>Cidade / Estado</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-trabalhadores">
+                        <tr><td colspan="5" class="empty-msg">Carregando candidatos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-empresas" class="view-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Razão Social / Nome</th>
+                            <th>E-mail Corporativo</th>
+                            <th>Cidade / Estado</th>
+                            <th>Data de Entrada</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-empresas">
+                        <tr><td colspan="5" class="empty-msg">Carregando corporações...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-vagas" class="view-section">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Título da Oportunidade</th>
+                            <th>Empresa Ofertante</th>
+                            <th>Salário Oferecido</th>
+                            <th>Status da Vaga</th>
+                            <th style="text-align: center;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-vagas">
+                        <tr><td colspan="5" class="empty-msg">Carregando quadro de vagas...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-provisionamento" class="view-section">
+            <div class="provision-form">
+                <h3 style="margin-bottom: 20px; text-align: center;">Provisionar Nova Conta Direta</h3>
+                <form id="provisionForm">
+                    <div class="form-group">
+                        <label>E-mail Oficial</label>
+                        <input type="email" id="prov-email" required placeholder="exemplo@provedor.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Senha Provisória</label>
+                        <input type="password" id="prov-password" required placeholder="Mínimo 6 dígitos">
+                    </div>
+                    <div class="form-group">
+                        <label>Nível Hierárquico do Perfil</label>
+                        <select id="prov-type">
+                            <option value="trabalhador">Trabalhador (Candidato)</option>
+                            <option value="empresa">Empresa (Corporativo)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-submit" id="btn-prov-submit"><i data-lucide="user-plus"></i> Forçar Criação Estrutural</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal" id="detailsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDetailsModal()"><i data-lucide="x"></i></button>
+            <h3 class="modal-title" id="modal-target-title">Detalhamento Técnico</h3>
+            <div id="modal-fields-container">
+                </div>
+            <div class="pass-box">
+                <strong>🔒 Segurança do Sistema:</strong> As senhas originais passam por criptografia hash irreversível e não podem ser visualizadas por administradores.
+                <button class="btn-reset-pass" id="btn-trigger-reset-email">Disparar E-mail de Redefinição de Senha</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signOut, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, doc, deleteDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyC3B5WcBUQIY1iuwJ5sKmgvivA8O-rG7z0",
+            authDomain: "meuportaldevagas.firebaseapp.com",
+            projectId: "meuportaldevagas",
+            storageBucket: "meuportaldevagas.firebasestorage.app",
+            messagingSenderId: "77991933793",
+            appId: "1:77991933793:web:2e8df544915ce3dc463720",
+            measurementId: "G-JMEWXD1DYW" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let globalData = {
+            trabalhadores: [],
+            empresas: [],
+            vagas: [],
+            candidaturas: []
+        };
+        let adminChartObj = null;
+        let currentActiveResetEmail = "";
+
+        // Funções de controle de abertura/fecho do menu lateral no telemóvel
+        window.toggleSidebar = function() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            const icon = document.getElementById('menu-icon');
+            
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            
+            if(sidebar.classList.contains('open')) {
+                icon.setAttribute('data-lucide', 'x');
+            } else {
+                icon.setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        };
+
+        window.closeSidebarOnMobile = function() {
+            const sidebar = document.getElementById('sidebar');
+            if(sidebar.classList.contains('open')) {
+                toggleSidebar();
+            }
+        };
+
+        window.switchView = function(viewId, element) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+            
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            if(element) element.classList.add('active');
+
+            const titles = {
+                overview: "Dashboard Global",
+                trabalhadores: "Gerenciamento de Candidatos",
+                empresas: "Gerenciamento de Empresas",
+                vagas: "Quadro de Vagas Ativas",
+                provisionamento: "Provisionamento Operacional"
+            };
+            document.getElementById("view-title").innerText = titles[viewId] || "Painel Admin";
+        };
+
+        async function loadDatabase() {
+            try {
+                const snapTrab = await getDocs(collection(db, "Trabalhadores"));
+                globalData.trabalhadores = snapTrab.docs.map(d => ({id: d.id, ...d.data()}));
+
+                const snapEmp = await getDocs(collection(db, "Empresas"));
+                globalData.empresas = snapEmp.docs.map(d => ({id: d.id, ...d.data()}));
+
+                const snapVagas = await getDocs(collection(db, "vagas"));
+                globalData.vagas = snapVagas.docs.map(d => ({id: d.id, ...d.data()}));
+
+                const snapCand = await getDocs(collection(db, "candidaturas"));
+                globalData.candidaturas = snapCand.docs.map(d => ({id: d.id, ...d.data()}));
+
+                calculateMetrics(null); 
+                renderTables();
+                renderMainChart();
+            } catch (error) {
+                console.error("Erro na carga de dados:", error);
+            }
+        }
+
+        function calculateMetrics(selectedMonthYear) {
+            let filteredTrab = globalData.trabalhadores;
+            let filteredEmp = globalData.empresas;
+            let filteredVag = globalData.vagas;
+            let filteredCand = globalData.candidaturas;
+
+            if (selectedMonthYear) {
+                const [ano, mes] = selectedMonthYear.split('-');
+                const monthYearBr = `${mes}/${ano}`;
+
+                filteredTrab = globalData.trabalhadores.filter(x => x.data_cadastro && x.data_cadastro.includes(monthYearBr));
+                filteredEmp = globalData.empresas.filter(x => x.dataCadastro && x.dataCadastro.includes(monthYearBr));
+                filteredVag = globalData.vagas.filter(x => (x.data_cadastro && x.data_cadastro.includes(monthYearBr)) || (x.dataCadastro && x.dataCadastro.includes(monthYearBr)));
+                filteredCand = globalData.candidaturas.filter(x => x.data_candidatura && x.data_candidatura.includes(monthYearBr));
+                
+                document.getElementById("sub-trabalhadores").innerText = `Cadastrados em ${monthYearBr}`;
+                document.getElementById("sub-empresas").innerText = `Cadastrados em ${monthYearBr}`;
+                document.getElementById("sub-vagas").innerText = `Publicadas em ${monthYearBr}`;
+                document.getElementById("sub-candidaturas").innerText = `Enviadas em ${monthYearBr}`;
+            } else {
+                document.getElementById("sub-trabalhadores").innerText = `Total histórico ativo`;
+                document.getElementById("sub-empresas").innerText = `Total histórico ativo`;
+                document.getElementById("sub-vagas").innerText = `Total histórico ativo`;
+                document.getElementById("sub-candidaturas").innerText = `Total histórico ativo`;
+            }
+
+            document.getElementById("val-total-trabalhadores").innerText = filteredTrab.length;
+            document.getElementById("val-total-empresas").innerText = filteredEmp.length;
+            document.getElementById("val-total-vagas").innerText = filteredVag.length;
+            document.getElementById("val-total-candidaturas").innerText = filteredCand.length;
+        }
+
+        document.getElementById("admin-month-filter").addEventListener("change", (e) => {
+            const val = e.target.value;
+            if(!val) {
+                calculateMetrics(null);
+            } else {
+                calculateMetrics(val);
+            }
+        });
+
+        function renderTables() {
+            const tTrab = document.getElementById("tbody-trabalhadores");
+            if(globalData.trabalhadores.length === 0) {
+                tTrab.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum candidato na base.</td></tr>';
+            } else {
+                tTrab.innerHTML = globalData.trabalhadores.map(item => {
+                    const nome = item.dados_pessoais?.nome || item.nome || "Não Informado";
+                    const email = item.dados_pessoais?.email || item.email || "N/A";
+                    const tel = item.dados_pessoais?.telefone || item.telefone || "N/A";
+                    const cid = item.dados_pessoais?.cidade_estado || "N/A";
+                    return `<tr>
+                        <td><strong>${nome}</strong></td>
+                        <td>${email}</td>
+                        <td>${tel}</td>
+                        <td>${cid}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-action btn-view" onclick="viewDetails('trabalhador', '${item.id}')"><i data-lucide="search" style="width:16px;"></i></button>
+                                <button class="btn-action btn-delete" onclick="deleteRecord('Trabalhadores', '${item.id}')"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+
+            const tEmp = document.getElementById("tbody-empresas");
+            if(globalData.empresas.length === 0) {
+                tEmp.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhuma empresa na base.</td></tr>';
+            } else {
+                tEmp.innerHTML = globalData.empresas.map(item => `<tr>
+                    <td><strong>${item.nome || item.id}</strong></td>
+                    <td>${item.email || "N/A"}</td>
+                    <td>${item.cidade_estado || item.estado || "N/A"}</td>
+                    <td>${item.dataCadastro || "N/A"}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action btn-view" onclick="viewDetails('empresa', '${item.id}')"><i data-lucide="search" style="width:16px;"></i></button>
+                            <button class="btn-action btn-delete" onclick="deleteRecord('Empresas', '${item.id}')"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+            }
+
+            const tVagas = document.getElementById("tbody-vagas");
+            if(globalData.vagas.length === 0) {
+                tVagas.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhuma vaga cadastrada.</td></tr>';
+            } else {
+                tVagas.innerHTML = globalData.vagas.map(item => `<tr>
+                    <td><strong>${item.titulo || "Sem título"}</strong></td>
+                    <td>${item.empresa || "N/A"}</td>
+                    <td><span style="color: var(--accent-success); font-weight:600;">R$ ${item.salario || "Não Informado"}</span></td>
+                    <td><span style="padding: 4px 8px; border-radius: 4px; font-size:11px; font-weight:700; background-color:${item.status === 'Ativa' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}; color:${item.status === 'Ativa' ? '#10b981' : '#ef4444'}">${item.status || "Ativa"}</span></td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-action btn-view" onclick="viewDetails('vaga', '${item.id}')"><i data-lucide="search" style="width:16px;"></i></button>
+                            <button class="btn-action btn-delete" onclick="deleteRecord('vagas', '${item.id}')"><i data-lucide="trash-2" style="width:16px;"></i></button>
+                        </div>
+                    </td>
+                </tr>`).join('');
+            }
+            lucide.createIcons();
+        }
+
+        window.deleteRecord = async function(collectionName, documentId) {
+            if(confirm(`⚠️ ATENÇÃO MÁSTER: Você tem certeza que deseja excluir permanentemente o registro [${documentId}] da coleção [${collectionName}]?`)) {
+                try {
+                    await deleteDoc(doc(db, collectionName, documentId));
+                    alert("Sucesso! Registro deletado.");
+                    loadDatabase(); 
+                } catch (e) {
+                    alert("Falha de permissão de segurança: " + e.message);
+                }
+            }
+        };
+
+        function renderMainChart() {
+            const ctx = document.getElementById('adminChart').getContext('2d');
+            if(adminChartObj) adminChartObj.destroy(); 
+            adminChartObj = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Candidatos Registrados', 'Empresas Ativas', 'Vagas Publicadas', 'Candidaturas Recebidas'],
+                    datasets: [{
+                        label: 'Volume de Dados Globais',
+                        data: [globalData.trabalhadores.length, globalData.empresas.length, globalData.vagas.length, globalData.candidaturas.length],
+                        backgroundColor: ['rgba(59, 130, 246, 0.6)', 'rgba(16, 185, 129, 0.6)', 'rgba(245, 158, 11, 0.6)', 'rgba(239, 68, 68, 0.6)'],
+                        borderColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2, borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
+                        x: { ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+        }
+
+        window.viewDetails = function(type, id) {
+            const container = document.getElementById("modal-fields-container");
+            const modalTitle = document.getElementById("modal-target-title");
+            container.innerHTML = "";
+
+            if(type === 'trabalhador') {
+                const u = globalData.trabalhadores.find(x => x.id === id);
+                modalTitle.innerText = "Ficha Completa do Trabalhador";
+                currentActiveResetEmail = u.dados_pessoais?.email || u.email || "";
+                container.innerHTML = `
+                    <div class="detail-item"><div class="detail-label">UID Interno do Firebase</div><div class="detail-value">${u.uid || u.id}</div></div>
+                    <div class="detail-item"><div class="detail-label">Nome Informado</div><div class="detail-value">${u.dados_pessoais?.nome || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">E-mail Cadastrado</div><div class="detail-value">${u.dados_pessoais?.email || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Telefone celular de contato</div><div class="detail-value">${u.dados_pessoais?.telefone || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Cidade / Estado</div><div class="detail-value">${u.dados_pessoais?.cidade_estado || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Objetivo Profissional</div><div class="detail-value">${u.objetivo || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Data de Registro</div><div class="detail-value">${u.data_cadastro || "N/A"}</div></div>
+                `;
+            } else if(type === 'empresa') {
+                const emp = globalData.empresas.find(x => x.id === id);
+                modalTitle.innerText = "Ficha Completa Corporativa";
+                currentActiveResetEmail = emp.email || "";
+                container.innerHTML = `
+                    <div class="detail-item"><div class="detail-label">ID / Nome Fantasia</div><div class="detail-value">${emp.id}</div></div>
+                    <div class="detail-item"><div class="detail-label">E-mail de Login</div><div class="detail-value">${emp.email || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Telefone / Contato</div><div class="detail-value">${emp.telefone || "Não Informado"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Endereço Fiscal</div><div class="detail-value">${emp.endereco || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Data de Abertura no App</div><div class="detail-value">${emp.dataCadastro || "N/A"}</div></div>
+                `;
+            } else if(type === 'vaga') {
+                const vg = globalData.vagas.find(x => x.id === id);
+                modalTitle.innerText = "Detalhamento da Vaga";
+                currentActiveResetEmail = ""; 
+                container.innerHTML = `
+                    <div class="detail-item"><div class="detail-label">Identificador da Vaga</div><div class="detail-value">${vg.id}</div></div>
+                    <div class="detail-item"><div class="detail-label">Título da Oportunidade</div><div class="detail-value">${vg.titulo || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Empresa Responsável</div><div class="detail-value">${vg.empresa || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Remuneração</div><div class="detail-value">R$ ${vg.salario || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Modalidade de Trabalho</div><div class="detail-value">${vg.modalidade || "N/A"}</div></div>
+                    <div class="detail-item"><div class="detail-label">Status do Anúncio</div><div class="detail-value">${vg.status || "Ativa"}</div></div>
+                `;
+            }
+
+            document.getElementById("detailsModal").classList.add("active");
+            lucide.createIcons();
+        };
+
+        window.closeDetailsModal = function() { document.getElementById("detailsModal").classList.remove("active"); };
+
+        document.getElementById("btn-trigger-reset-email").addEventListener("click", async () => {
+            if(!currentActiveResetEmail) { alert("Esta entidade não possui uma conta de e-mail mapeada."); return; }
+            try {
+                await sendPasswordResetEmail(auth, currentActiveResetEmail);
+                alert(`Sucesso! Um e-mail de redefinição foi enviado para: ${currentActiveResetEmail}`);
+            } catch (e) { alert("Erro ao disparar serviço: " + e.message); }
+        });
+
+        document.getElementById("provisionForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("prov-email").value.trim();
+            const password = document.getElementById("prov-password").value;
+            const type = document.getElementById("prov-type").value;
+            const btn = document.getElementById("btn-prov-submit");
+
+            try {
+                btn.disabled = true; btn.innerText = "Criando Conta...";
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                const newUser = cred.user;
+
+                if(type === 'empresa') {
+                    await setDoc(doc(db, "Empresas", newUser.uid), { uid: newUser.uid, email: email, nome: "Nova Empresa", dataCadastro: new Date().toLocaleString("pt-BR") });
+                } else {
+                    await setDoc(doc(db, "Trabalhadores", newUser.uid), { uid: newUser.uid, dados_pessoais: { nome: "Novo Candidato", email: email }, data_cadastro: new Date().toLocaleString("pt-BR") });
+                }
+
+                alert(`Conta estruturada com sucesso!`);
+                document.getElementById('provisionForm').reset();
+                loadDatabase();
+            } catch(error) { alert("Falha no provisionamento: " + error.message); } 
+            finally { btn.disabled = false; btn.innerHTML = '<i data-lucide="user-plus"></i> Forçar Criação Estrutural'; lucide.createIcons(); }
+        });
+
+        document.getElementById('admin-logout').addEventListener('click', () => { signOut(auth).then(() => window.location.href = "login.html"); });
+
+        lucide.createIcons();
+        loadDatabase();
+    </script>
+</body>
+</html>
